@@ -1,5 +1,15 @@
 Revision history for Perl extension ExtUtils::Manifest.
 
+=head1 1.30, Mar 14, 1997
+
+Folded back changes from perl5.003_93, mainly for VMS.
+
+Included patch from Roderick Schertler, namely: allow comments in
+MANIFEST
+
+Changed behaviour as suggested by Roderick: carp if the C<how>
+argument to cp_if_diff() is invalid (instead of fail silently).
+
 =head1 1.28, Dec 6, 1996
 
 This is the fist version broken out of the MakeMaker distribution. It
