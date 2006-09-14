@@ -1,3 +1,6 @@
+1.48  Thu, Sep 14, 2006
+  - alter Build.PL so Module::Build will add MANIFEST.SKIP to blib/.
+
 1.47  Wed, Sep 6, 2006
   - initial CPAN release since splitting off from ExtUtils::MakeMaker
 

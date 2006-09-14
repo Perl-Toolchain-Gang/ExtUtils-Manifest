@@ -18,5 +18,6 @@ my $build = Module::Build->new(
   dist_abstract_from => 'lib/ExtUtils/Manifest.pm',
 );
 
+$build->add_build_element('SKIP');
 $build->create_build_script;
 

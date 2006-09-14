@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         ExtUtils-Manifest
-version:      1.47
+version:      1.48
 version_from: lib/ExtUtils/Manifest.pm
 installdirs:  perl
 abstract:     utilities to write and check a MANIFEST file
@@ -13,6 +13,6 @@ requires:
 provides:
   ExtUtils::Manifest:
     file: lib/ExtUtils/Manifest.pm
-    version: 1.47
+    version: 1.48
 distribution_type: module
 generated_by: ExtUtils::MakeMaker version 6.21
