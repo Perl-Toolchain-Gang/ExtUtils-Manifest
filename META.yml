@@ -1,0 +1,18 @@
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         ExtUtils-Manifest
+version:      1.47
+version_from: lib/ExtUtils/Manifest.pm
+installdirs:  perl
+abstract:     utilities to write and check a MANIFEST file
+authored_by:
+    - Randy Kobes <r.kobes@uwinnipeg.ca>
+requires:
+    File::Basename:                0
+    File::Spec:                    0.8
+provides:
+  ExtUtils::Manifest:
+    file: lib/ExtUtils/Manifest.pm
+    version: 1.47
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.21

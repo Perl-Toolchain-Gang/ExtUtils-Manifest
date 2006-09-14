@@ -1,5 +1,9 @@
-Changes
-MANIFEST
+Build.PL
+lib/ExtUtils/Manifest.pm
+lib/ExtUtils/MANIFEST.SKIP
 Makefile.PL
-Manifest.pm
-test.pl
+MANIFEST			This list of files
+README
+Changes
+t/Manifest.t
+META.yml                                 Module meta-data (added by MakeMaker)
