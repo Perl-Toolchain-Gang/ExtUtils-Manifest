@@ -1,3 +1,11 @@
+1.49  Mon, Oct 9, 2006
+  - Quiet warning in Manifest.t
+      http://rt.cpan.org/Ticket/Display.html?id=21985
+  - ExtUtils::Manifest should strip CRLF/NL off MANIFEST.SKIP
+      http://rt.cpan.org/Ticket/Display.html?id=16172
+  - An empty MANIFEST.SKIP with generate a blank MANIFEST
+      http://rt.cpan.org/Ticket/Display.html?id=19416
+
 1.48  Thu, Sep 14, 2006
   - alter Build.PL so Module::Build will add MANIFEST.SKIP to blib/.
 
