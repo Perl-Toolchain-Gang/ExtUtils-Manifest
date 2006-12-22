@@ -1,3 +1,11 @@
+1.50  Fri, Dec 22, 2006
+  - add recognition of two directives in one's own MANIFEST.SKIP:
+       #!include_default
+       #!include /path/to/another/manifest.skip
+    to include, respectively, the contents of the default 
+    MANIFEST.SKIP and an external manifest.skip:
+       http://rt.cpan.org/Public/Bug/Display.html?id=13622
+ 
 1.49  Mon, Oct 9, 2006
   - Quiet warning in Manifest.t
       http://rt.cpan.org/Ticket/Display.html?id=21985
