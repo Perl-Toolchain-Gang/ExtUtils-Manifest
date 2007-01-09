@@ -19,6 +19,7 @@ use Cwd;
 use File::Spec;
 use File::Path;
 use File::Find;
+use Config;
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -70,6 +71,12 @@ rmtree('mantest');
 ok( mkdir( 'mantest', 0777 ), 'make mantest directory' );
 ok( chdir( 'mantest' ), 'chdir() to mantest' );
 ok( add_file('foo'), 'add a temporary file' );
+
+# This ensures the -x check for manicopy means something
+# Some platforms don't have chmod or an executable bit, in which case
+# this call will do nothing or fail, but on the platforms where chmod()
+# works, we test the executable bit is copied
+chmod( 0744, 'foo') if $Config{'chmod'};
 
 # there shouldn't be a MANIFEST there
 my ($res, $warn) = catch_warning( \&mkmanifest );

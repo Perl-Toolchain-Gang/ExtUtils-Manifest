@@ -1,3 +1,7 @@
+1.51  Tue, Jan 9, 2007
+  - apply chmod patch supplied by TONYC:
+      http://rt.cpan.org/Ticket/Display.html?id=13079
+
 1.50  Fri, Dec 22, 2006
   - add recognition of two directives in one's own MANIFEST.SKIP:
        #!include_default

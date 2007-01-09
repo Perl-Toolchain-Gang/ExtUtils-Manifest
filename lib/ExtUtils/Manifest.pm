@@ -13,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS 
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = '1.50';
+$VERSION = '1.51';
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -522,7 +522,7 @@ sub cp {
 
     copy($srcFile,$dstFile);
     utime $access, $mod + ($Is_VMS ? 1 : 0), $dstFile;
-    _manicopy_chmod($dstFile);
+    _manicopy_chmod($srcFile, $dstFile);
 }
 
 
@@ -531,7 +531,7 @@ sub ln {
     return &cp if $Is_VMS or ($^O eq 'MSWin32' and Win32::IsWin95());
     link($srcFile, $dstFile);
 
-    unless( _manicopy_chmod($dstFile) ) {
+    unless( _manicopy_chmod($srcFile, $dstFile) ) {
         unlink $dstFile;
         return;
     }
@@ -542,10 +542,10 @@ sub ln {
 # 2) Let everyone read it.
 # 3) If the owner can execute it, everyone can.
 sub _manicopy_chmod {
-    my($file) = shift;
+    my($srcFile, $dstFile) = @_;
 
-    my $perm = 0444 | (stat $file)[2] & 0700;
-    chmod( $perm | ( $perm & 0100 ? 0111 : 0 ), $file );
+    my $perm = 0444 | (stat $srcFile)[2] & 0700;
+    chmod( $perm | ( $perm & 0100 ? 0111 : 0 ), $dstFile );
 }
 
 # Files that are often modified in the distdir.  Don't hard link them.
