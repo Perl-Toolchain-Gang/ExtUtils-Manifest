@@ -1,4 +1,7 @@
-1.52  Tue, Mar 25, 2008
+1.53  Thu, May 29, 2008
+  - forgot to update META.yml
+
+1.52  Thu, Mar 25, 2008
   - apply doc changes, as suggested:
       http://rt.cpan.org/Ticket/Display.html?id=28361
   - allow spaces in filenames when quoted:
