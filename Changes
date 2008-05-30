@@ -1,3 +1,12 @@
+1.52  Tue, Mar 25, 2008
+  - apply doc changes, as suggested:
+      http://rt.cpan.org/Ticket/Display.html?id=28361
+  - allow spaces in filenames when quoted:
+      http://rt.cpan.org/Ticket/Display.html?id=34414
+    Patch supplied by sthoenna at efn.org
+  - patch for cp_if_diff to return if file not found:
+      http://rt.perl.org/rt3/Public/Bug/Display.html?id=36576
+
 1.51  Tue, Jan 9, 2007
   - apply chmod patch supplied by TONYC:
       http://rt.cpan.org/Ticket/Display.html?id=13079

@@ -13,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS 
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = '1.51';
+$VERSION = '1.52';
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -71,16 +71,14 @@ exported on request
     mkmanifest();
 
 Writes all files in and below the current directory to your F<MANIFEST>.
-It works similar to
+It works similar to the result of the Unix command
 
     find . > MANIFEST
 
 All files that match any regular expression in a file F<MANIFEST.SKIP>
 (if it exists) are ignored.
 
-Any existing F<MANIFEST> file will be saved as F<MANIFEST.bak>.  Lines
-from the old F<MANIFEST> file is preserved, including any comments
-that are found in the existing F<MANIFEST> file in the new one.
+Any existing F<MANIFEST> file will be saved as F<MANIFEST.bak>.
 
 =cut
 
@@ -94,7 +92,7 @@ sub mkmanifest {
     $read = {} if $manimiss;
     local *M;
     rename $MANIFEST, "$MANIFEST.bak" unless $manimiss;
-    open M, ">$MANIFEST" or die "Could not open $MANIFEST: $!";
+    open M, "> $MANIFEST" or die "Could not open $MANIFEST: $!";
     my $skip = _maniskip();
     my $found = manifind();
     my($key,$val,$file,%all);
@@ -117,6 +115,10 @@ sub mkmanifest {
 	my $tabs = (5 - (length($file)+1)/8);
 	$tabs = 1 if $tabs < 1;
 	$tabs = 0 unless $text;
+        if ($file =~ /\s/) {
+            $file =~ s/([\\'])/\\$1/g;
+            $file = "'$file'";
+        }
 	print M $file, "\t" x $tabs, $text, "\n";
     }
     close M;
@@ -307,7 +309,7 @@ sub maniread {
     $mfile ||= $MANIFEST;
     my $read = {};
     local *M;
-    unless (open M, $mfile){
+    unless (open M, "< $mfile"){
         warn "Problem opening $mfile: $!";
         return $read;
     }
@@ -316,7 +318,16 @@ sub maniread {
         chomp;
         next if /^\s*#/;
 
-        my($file, $comment) = /^(\S+)\s*(.*)/;
+        my($file, $comment);
+
+        # filename may contain spaces if enclosed in ''
+        # (in which case, \\ and \' are escapes)
+        if (($file, $comment) = /^'(\\[\\']|.+)+'\s*(.*)/) {
+            $file =~ s/\\([\\'])/$1/g;
+        }
+        else {
+            ($file, $comment) = /^(\S+)\s*(.*)/;
+        }
         next unless $file;
 
         if ($Is_MacOS) {
@@ -348,12 +359,14 @@ sub _maniskip {
     my $mfile = "$MANIFEST.SKIP";
     _check_mskip_directives($mfile) if -f $mfile;
     local(*M, $_);
-    open M, $mfile or open M, $DEFAULT_MSKIP or return sub {0};
+    open M, "< $mfile" or open M, "< $DEFAULT_MSKIP" or return sub {0};
     while (<M>){
 	chomp;
 	s/\r//;
 	next if /^#/;
 	next if /^\s*$/;
+        s/^'//;
+        s/'$//;
 	push @skip, _macify($_);
     }
     close M;
@@ -379,7 +392,7 @@ sub _check_mskip_directives {
     local (*M, $_);
     my @lines = ();
     my $flag = 0;
-    unless (open M, $mfile) {
+    unless (open M, "< $mfile") {
         warn "Problem opening $mfile: $!";
         return;
     }
@@ -407,7 +420,7 @@ sub _check_mskip_directives {
     return unless $flag;
     rename $mfile, "$mfile.bak";
     warn "Debug: Saving original $mfile as $mfile.bak\n" if $Debug;
-    unless (open M, ">$mfile") {
+    unless (open M, "> $mfile") {
         warn "Problem opening $mfile: $!";
         return;
     }
@@ -425,7 +438,7 @@ sub _include_mskip_file {
         return;
     }
     local (*M, $_);
-    unless (open M, $mskip) {
+    unless (open M, "< $mskip") {
         warn "Problem opening $mskip: $!";
         return;
     }
@@ -489,7 +502,10 @@ sub manicopy {
 
 sub cp_if_diff {
     my($from, $to, $how)=@_;
-    -f $from or carp "$0: $from not found";
+    if (! -f $from) {
+        carp "$from not found";
+        return;
+    }
     my($diff) = 0;
     local(*F,*T);
     open(F,"< $from\0") or die "Can't read $from: $!\n";
@@ -623,6 +639,10 @@ sub maniadd {
 
     foreach my $file (_sort @needed) {
         my $comment = $additions->{$file} || '';
+        if ($file =~ /\s/) {
+            $file =~ s/([\\'])/\\$1/g;
+            $file = "'$file'";
+        }
         printf MANIFEST "%-40s %s\n", $file, $comment;
     }
     close MANIFEST or die "Error closing $MANIFEST: $!";
@@ -666,11 +686,14 @@ means F<foo/bar> style not F<foo\bar>.
 
 Anything between white space and an end of line within a C<MANIFEST>
 file is considered to be a comment.  Any line beginning with # is also
-a comment.
+a comment. Beginning with ExtUtils::Manifest 1.52, a filename may
+contain whitespace characters if it is enclosed in single quotes; single
+quotes or backslashes in that filename must be backslash-escaped.
 
     # this a comment
     some/file
     some/other/file            comment about some/file
+    'some/third file'          comment
 
 
 =head2 MANIFEST.SKIP
