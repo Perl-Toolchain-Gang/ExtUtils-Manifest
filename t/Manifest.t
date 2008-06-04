@@ -13,7 +13,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 83;
+use Test::More tests => 94;
 use Cwd;
 
 use File::Spec;
@@ -60,7 +60,7 @@ sub remove_dir {
 BEGIN { 
     use_ok( 'ExtUtils::Manifest', 
             qw( mkmanifest manicheck filecheck fullcheck 
-                maniread manicopy skipcheck maniadd) ); 
+                maniread manicopy skipcheck maniadd maniskip) ); 
 }
 
 my $cwd = Cwd::getcwd();
@@ -329,7 +329,36 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
 		  "'$funky_file' excluded via mymanifest.skip" );
 	}
     }
-    $Files{"$_.bak"}++ for (qw(MANIFEST MANIFEST.SKIP));
+
+    # tests for maniskip
+    my $skipchk = maniskip();
+    is ( $skipchk->('albatross'), 1,
+	'albatross excluded via MANIFEST.SKIP' );
+    is( $skipchk->('yarrow'), '',
+	'yarrow included in MANIFEST' );
+    is( $skipchk->('bar'), '',
+	'bar included in MANIFEST' );
+    $skipchk = maniskip('mymanifest.skip');
+    is( $skipchk->('foobar'), 1,
+	'foobar excluded via mymanifest.skip' );
+    is( $skipchk->('foo'), 1,
+	'foo excluded via mymanifest.skip' );
+    is( $skipchk->('mymanifest.skip'), '',
+        'mymanifest.skip included via mydefault.skip' );
+    is( $skipchk->('mydefault.skip'), '',
+        'mydefault.skip included via mydefault.skip' );
+    $skipchk = maniskip('mydefault.skip');
+    is( $skipchk->('foobar'), '',
+	'foobar included via mydefault.skip' );
+    is( $skipchk->('foo'), '',
+	'foo included via mydefault.skip' );
+    is( $skipchk->('mymanifest.skip'), 1,
+        'mymanifest.skip excluded via mydefault.skip' );
+    is( $skipchk->('mydefault.skip'), 1,
+        'mydefault.skip excluded via mydefault.skip' );
+
+    my $extsep = $Is_VMS ? '_' : '.';
+    $Files{"$_.bak"}++ for ('MANIFEST', "MANIFEST${extsep}SKIP");
 }
 
 add_file('MANIFEST'   => 'Makefile.PL');

@@ -1,3 +1,9 @@
+1.54  Tue, Jun 3, 2008
+  - make maniskip a public routine, and allow an argument to
+    override $mfile (patch supplied by Ricardo Signes)
+  - fix VMS test failures:
+      http://rt.cpan.org/Ticket/Display.html?id=25377
+
 1.53  Thu, May 29, 2008
   - forgot to update META.yml
 

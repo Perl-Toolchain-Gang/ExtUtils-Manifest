@@ -13,11 +13,12 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS 
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = '1.53';
+$VERSION = '1.54';
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
                 manifind   maniread   manicopy   maniadd
+                maniskip
                );
 
 $Is_MacOS = $^O eq 'MacOS';
@@ -91,9 +92,11 @@ sub mkmanifest {
     my $read = (-r 'MANIFEST' && maniread()) or $manimiss++;
     $read = {} if $manimiss;
     local *M;
-    rename $MANIFEST, "$MANIFEST.bak" unless $manimiss;
+    my $bakbase = $MANIFEST;
+    $bakbase =~ s/\./_/g if $Is_VMS; # avoid double dots
+    rename $MANIFEST, "$bakbase.bak" unless $manimiss;
     open M, "> $MANIFEST" or die "Could not open $MANIFEST: $!";
-    my $skip = _maniskip();
+    my $skip = maniskip();
     my $found = manifind();
     my($key,$val,$file,%all);
     %all = (%$found, %$read);
@@ -110,7 +113,6 @@ sub mkmanifest {
 	    warn "Added to $MANIFEST: $file\n" unless exists $read->{$file};
 	}
 	my $text = $all{$file};
-	($file,$text) = split(/\s+/,$text,2) if $Is_VMS && $text;
 	$file = _unmacify($file);
 	my $tabs = (5 - (length($file)+1)/8);
 	$tabs = 1 if $tabs < 1;
@@ -232,7 +234,7 @@ file.
 sub skipcheck {
     my($p) = @_;
     my $found = manifind();
-    my $matches = _maniskip();
+    my $matches = maniskip();
 
     my @skipped = ();
     foreach my $file (_sort keys %$found){
@@ -275,7 +277,7 @@ sub _check_manifest {
     my($p) = @_;
     my $read = maniread() || {};
     my $found = manifind($p);
-    my $skip  = _maniskip();
+    my $skip  = maniskip();
 
     my @missentry = ();
     foreach my $file (_sort keys %$found){
@@ -353,10 +355,23 @@ sub maniread {
     $read;
 }
 
+=item maniskip
+
+    my $skipchk = maniskip();
+    my $skipchk = maniskip($manifest_skip_file);
+
+    if ($skipchk->($file)) { .. }
+
+reads a named C<MANIFEST.SKIP> file (defaults to C<MANIFEST.SKIP> in
+the current directory) and returns a CODE reference that tests whether
+a given filename should be skipped.
+
+=cut
+
 # returns an anonymous sub that decides if an argument matches
-sub _maniskip {
+sub maniskip {
     my @skip ;
-    my $mfile = "$MANIFEST.SKIP";
+    my $mfile = shift || "$MANIFEST.SKIP";
     _check_mskip_directives($mfile) if -f $mfile;
     local(*M, $_);
     open M, "< $mfile" or open M, "< $DEFAULT_MSKIP" or return sub {0};
@@ -418,8 +433,10 @@ sub _check_mskip_directives {
     }
     close M;
     return unless $flag;
-    rename $mfile, "$mfile.bak";
-    warn "Debug: Saving original $mfile as $mfile.bak\n" if $Debug;
+    my $bakbase = $mfile;
+    $bakbase =~ s/\./_/g if $Is_VMS;  # avoid double dots
+    rename $mfile, "$bakbase.bak";
+    warn "Debug: Saving original $mfile as $bakbase.bak\n" if $Debug;
     unless (open M, "> $mfile") {
         warn "Problem opening $mfile: $!";
         return;
