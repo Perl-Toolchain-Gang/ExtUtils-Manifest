@@ -1,7 +1,6 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+--- #YAML:1.0
 name:         ExtUtils-Manifest
-version:      1.54
+version:      1.55
 version_from: lib/ExtUtils/Manifest.pm
 installdirs:  perl
 license:      perl
@@ -14,6 +13,22 @@ requires:
 provides:
   ExtUtils::Manifest:
     file: lib/ExtUtils/Manifest.pm
-    version: 1.54
+    version: 1.55
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.21
+generated_by: Randy Kobes
+urls:
+   license: http://dev.perl.org/licenses/
+resources:
+  license: http://dev.perl.org/licenses/
+  homepage: http://svn.perl.org/modules/ExtUtils-Manifest/trunk/
+  bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-Manifest
+  AnnoCPAN: http://annocpan.org/dist/ExtUtils-Manifest
+  CPANForum: http://www.cpanforum.com/dist/ExtUtils-Manifest
+  CPANTS: http://cpants.perl.org/dist/ExtUtils-Manifest
+  Rating: http://cpanratings.perl.org/d/ExtUtils-Manifest
+  SearchCPAN: http://search.cpan.org/~RKOBES/ExtUtils-Manifest/
+  Testers: http://cpantesters.perl.org/show/ExtUtils-Manifest.html
+  UWinnipeg: http://cpan.uwinnipeg.ca/dist/ExtUtils-Manifest
+meta-spec:
+  version: 1.3
+  url: http://module-build.sourceforge.net/META-spec-v1.3.html
