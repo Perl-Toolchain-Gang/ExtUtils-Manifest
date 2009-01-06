@@ -1,3 +1,7 @@
+1.56  Sun, Jan 4, 2009
+  - Add support for VMS in Unix or extended character set mode:
+     https://rt.cpan.org/Ticket/Display.html?id=42146
+
 1.55  Sun, Oct 12, 2008
   - test nit with space in filename on VMS:
       http://rt.cpan.org/Ticket/Display.html?id=39934
