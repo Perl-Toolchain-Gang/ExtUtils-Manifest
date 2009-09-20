@@ -1,26 +1,26 @@
 --- #YAML:1.0
 name:         ExtUtils-Manifest
-version:      1.56
+version:      1.57
 version_from: lib/ExtUtils/Manifest.pm
 installdirs:  perl
 license:      perl
 abstract:     utilities to write and check a MANIFEST file
 authored_by:
-    - Randy Kobes <r.kobes@uwinnipeg.ca>
+    - Randy Kobes <randy.kobes@gmail.com>
 requires:
     File::Basename:                0
     File::Spec:                    0.8
 provides:
   ExtUtils::Manifest:
     file: lib/ExtUtils/Manifest.pm
-    version: 1.56
+    version: 1.57
 distribution_type: module
 generated_by: Randy Kobes
 urls:
    license: http://dev.perl.org/licenses/
 resources:
   license: http://dev.perl.org/licenses/
-  homepage: http://svn.perl.org/modules/ExtUtils-Manifest/trunk/
+  homepage: http://github.com/rkobes/extutils-manifest
   bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-Manifest
   AnnoCPAN: http://annocpan.org/dist/ExtUtils-Manifest
   CPANForum: http://www.cpanforum.com/dist/ExtUtils-Manifest

@@ -1,3 +1,10 @@
+1.57  Sat, Sep 19, 2009
+  - Enhancements to MANIFEST.SKIP from Module::Build:
+     http://rt.cpan.org/Ticket/Display.html?id=47401
+  - ExtUtils::Manifest::maniskip() incorrectly parses some 
+    lines with comments and internal whitespace filenames:
+      http://rt.cpan.org/Ticket/Display.html?id=45016
+
 1.56  Sun, Jan 4, 2009
   - Add support for VMS in Unix or extended character set mode:
      https://rt.cpan.org/Ticket/Display.html?id=42146
