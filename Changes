@@ -1,3 +1,10 @@
+1.58  Sun, Nov 21, 2009
+  - add MYMETA files to default skip list:
+     http://rt.cpan.org/Ticket/Display.html?id=50923
+    (suggested by DAGOLDEN)
+  - Avoid Devel::Cover and Devel::CoverX::Covered files
+    (suggested by daxim)
+
 1.57  Sat, Sep 19, 2009
   - Enhancements to MANIFEST.SKIP from Module::Build:
      http://rt.cpan.org/Ticket/Display.html?id=47401
