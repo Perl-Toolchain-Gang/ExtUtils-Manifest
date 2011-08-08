@@ -456,4 +456,3 @@ END {
 	ok( chdir( $cwd ), 'return to parent directory' );
 	remove_dir( 'mantest' );
 }
-
