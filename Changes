@@ -1,3 +1,6 @@
+1.59  Mon, Aug 8, 2011
+  - Prevent mixing non-native and native newlines in MANIFEST files
+
 1.58  Sun, Nov 21, 2009
   - add MYMETA files to default skip list:
      http://rt.cpan.org/Ticket/Display.html?id=50923
