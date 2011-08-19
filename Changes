@@ -1,3 +1,6 @@
+1.60  Mon, Aug 19, 2011
+  - Clean up MANIFEST before creating a new one.
+
 1.59  Mon, Aug 8, 2011
   - Prevent mixing non-native and native newlines in MANIFEST files
 
