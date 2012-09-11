@@ -1,3 +1,7 @@
+1.61  Tue, Sep 11, 2012
+  - Avoid some test-time warnings.
+  - Current VMS can handle filenames with spaces.
+
 1.60  Mon, Aug 19, 2011
   - Clean up MANIFEST before creating a new one.
 
