@@ -1,3 +1,6 @@
+1.62  Sun, Sep 8, 2013
+  - Normalize VMS case handling in ExtUtils::Manifest.
+
 1.61  Tue, Sep 11, 2012
   - Avoid some test-time warnings.
   - Current VMS can handle filenames with spaces.
