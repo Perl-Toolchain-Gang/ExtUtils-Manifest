@@ -1,3 +1,6 @@
+1.63  Sun, Sep 8, 2013
+  - Deal with VMS extended filespecs
+
 1.62  Sun, Sep 8, 2013
   - Normalize VMS case handling in ExtUtils::Manifest.
 
