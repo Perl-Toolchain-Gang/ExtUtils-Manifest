@@ -1,3 +1,7 @@
+1.65  Fri, Aug  8, 2014
+  - Support perls < v5.8.3 once again
+  - Don't generate MANIFESTs with CRLFs on Windows
+
 1.64  Thu, Jul 17, 2014
   - Ignore vim swap files and prove generated files
   - use Exporter import
