@@ -1,3 +1,9 @@
+1.66  Sun, Aug 31, 2014
+  - manifind() will now follow symlinks
+  - Tests fixed if PERL_MM_MANIFEST_VERBOSE env var is set to
+    false value
+  - Fixed bug with maniread()'s handling of quoted filenames
+
 1.65  Fri, Aug  8, 2014
   - Support perls < v5.8.3 once again
   - Don't generate MANIFESTs with CRLFs on Windows
