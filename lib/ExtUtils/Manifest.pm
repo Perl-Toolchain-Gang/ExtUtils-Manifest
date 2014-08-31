@@ -354,7 +354,7 @@ sub maniread {
 
         # filename may contain spaces if enclosed in ''
         # (in which case, \\ and \' are escapes)
-        if (($file, $comment) = /^'(\\[\\']|.+)+'\s*(.*)/) {
+        if (($file, $comment) = /^'((?:\\[\\']|.+)+)'\s*(.*)/) {
             $file =~ s/\\([\\'])/$1/g;
         }
         else {

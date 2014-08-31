@@ -13,7 +13,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 97;
+use Test::More tests => 98;
 use Cwd;
 
 use File::Spec;
@@ -331,6 +331,20 @@ SKIP: {
     is( maniread()->{'foo bar\\baz\'quux'}, "backslash and quote",
 	'backslashed and quoted manifest filename' );
     $funky_files{'space_quote_backslash'} = 'foo bar\\baz\'quux';
+}
+
+# test including a filename which is itself a quoted string
+# https://rt.perl.org/Ticket/Display.html?id=122415
+SKIP: {
+    my $quoted_filename = q{'quoted name.txt'};
+    my $description     = "quoted string";
+    add_file( $quoted_filename  => $description )
+        or skip "couldn't create $description test file", 1;
+    local $ExtUtils::Manifest::MANIFEST = "albatross";
+    maniadd({ $quoted_filename => $description });
+    is( maniread()->{$quoted_filename}, $description,
+     'file whose name starts and ends with quotes' );
+    $funky_files{$description} = $quoted_filename;
 }
 
 my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
