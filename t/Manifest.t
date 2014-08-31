@@ -8,6 +8,7 @@ BEGIN {
     else {
         unshift @INC, 't/lib';
     }
+    $ENV{PERL_MM_MANIFEST_VERBOSE}=1;
 }
 chdir 't';
 
@@ -33,7 +34,6 @@ if ($Is_VMS) {
     }
     $Is_VMS_noefs = 0 if $vms_efs;
 }
-
 
 # We're going to be chdir'ing and modules are sometimes loaded on the
 # fly in this test, so we need an absolute @INC.
