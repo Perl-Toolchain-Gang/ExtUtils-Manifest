@@ -133,13 +133,11 @@ sub mkmanifest {
 	if ($skip->($file)) {
 	    # Policy: only remove files if they're listed in MANIFEST.SKIP.
 	    # Don't remove files just because they don't exist.
-	    print STDERR "Removed from $MANIFEST: $file\n"
-            if $Verbose and exists $read->{$file};
+	    warn "Removed from $MANIFEST: $file\n" if $Verbose and exists $read->{$file};
 	    next;
 	}
 	if ($Verbose){
-	    print STDERR "Added to $MANIFEST: $file\n"
-            unless exists $read->{$file};
+	    warn "Added to $MANIFEST: $file\n" unless exists $read->{$file};
 	}
 	my $text = $all{$file};
 	$file = _unmacify($file);
@@ -188,7 +186,7 @@ sub manifind {
 
     my $wanted = sub {
 	my $name = clean_up_filename($File::Find::name);
-	print STDERR "Debug: diskfile $name\n" if $Debug;
+	warn "Debug: diskfile $name\n" if $Debug;
 	return if -d $_;
 	$found->{$name} = "";
     };
@@ -271,7 +269,7 @@ sub skipcheck {
     my @skipped = ();
     foreach my $file (_sort keys %$found){
         if (&$matches($file)){
-            print STDERR "Skipping $file\n";
+            warn "Skipping $file\n" unless $Quiet;
             push @skipped, $file;
             next;
         }
@@ -289,14 +287,14 @@ sub _check_files {
 
     my(@missfile) = ();
     foreach my $file (_sort keys %$read){
-        print STDERR "Debug: manicheck checking from $MANIFEST $file\n" if $Debug;
+        warn "Debug: manicheck checking from $MANIFEST $file\n" if $Debug;
         if ($dosnames){
             $file = lc $file;
             $file =~ s=(\.(\w|-)+)=substr ($1,0,4)=ge;
             $file =~ s=((\w|-)+)=substr ($1,0,8)=ge;
         }
         unless ( exists $found->{$file} ) {
-            print STDERR "No such file: $file\n" unless $Quiet;
+            warn "No such file: $file\n" unless $Quiet;
             push @missfile, $file;
         }
     }
@@ -314,10 +312,10 @@ sub _check_manifest {
     my @missentry = ();
     foreach my $file (_sort keys %$found){
         next if $skip->($file);
-        print STDERR "Debug: manicheck checking from disk $file\n" if $Debug;
+        warn "Debug: manicheck checking from disk $file\n" if $Debug;
         unless ( exists $read->{$file} ) {
             my $canon = $Is_MacOS ? "\t" . _unmacify($file) : '';
-            print STDERR "Not in $MANIFEST: $file$canon\n" unless $Quiet;
+            warn "Not in $MANIFEST: $file$canon\n" unless $Quiet;
             push @missentry, $file;
         }
     }
