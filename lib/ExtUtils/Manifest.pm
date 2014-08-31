@@ -195,7 +195,7 @@ sub manifind {
     # $File::Find::name is unavailable.
     # Also, it's okay to use / here, because MANIFEST files use Unix-style
     # paths.
-    find({wanted => $wanted},
+    find({wanted => $wanted, follow => 1},
 	 $Is_MacOS ? ":" : ".");
 
     return $found;
