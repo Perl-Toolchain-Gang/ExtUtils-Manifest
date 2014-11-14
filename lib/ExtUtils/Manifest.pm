@@ -5,7 +5,7 @@ use Config;
 use File::Basename;
 use File::Copy 'copy';
 use File::Find;
-use File::Spec;
+use File::Spec 0.8;
 use Carp;
 use strict;
 use warnings;
