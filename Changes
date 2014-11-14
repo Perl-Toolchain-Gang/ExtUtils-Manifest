@@ -582,7 +582,7 @@ r1371 | schwern | 2003-04-06 03:52:59 -0500 (Sun, 06 Apr 2003) | 9 lines
 
  Fixing the ECHO macro on dmake.
 
- Fixing }} escaping on dmake, but this is just a stopgap measure.
+ Fixing {{ '}'x2 }} escaping on dmake, but this is just a stopgap measure.
 
  Making ExtUtils::Manifest sort things case-insensitively.  I think it
  displays better.
