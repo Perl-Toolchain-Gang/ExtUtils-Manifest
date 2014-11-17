@@ -893,9 +893,7 @@ L<ExtUtils::MakeMaker> which has handy targets for most of the functionality.
 
 Andreas Koenig C<andreas.koenig@anima.de>
 
-Maintained by Michael G Schwern C<schwern@pobox.com> within the
-ExtUtils-MakeMaker package and, as a separate CPAN package, by
-Randy Kobes C<r.kobes@uwinnipeg.ca>.
+Currently maintained by the Perl Toolchain Gang.
 
 =cut
 
