@@ -14,7 +14,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 98;
+use Test::More tests => 110;
 use Cwd;
 
 use File::Spec;
@@ -93,16 +93,12 @@ ok( add_file('foo'), 'add a temporary file' );
 # works, we test the executable bit is copied
 chmod( 0744, 'foo') if $Config{'chmod'};
 
-# there shouldn't be a MANIFEST there
-my ($res, $warn) = catch_warning( \&mkmanifest );
-# Canonize the order.
-$warn = join("", map { "$_|" }
-                 sort { lc($a) cmp lc($b) } split /\r?\n/, $warn);
-is( $warn, "Added to MANIFEST: foo|Added to MANIFEST: MANIFEST|",
-    "mkmanifest() displayed its additions" );
+my ($res, $warn);
 
-# and now you see it
-ok( -e 'MANIFEST', 'create MANIFEST file' );
+add_file('MANIFEST',<<'EOF');
+foo
+MANIFEST
+EOF
 
 my @list = read_manifest();
 is( @list, 2, 'check files in MANIFEST' );
@@ -196,16 +192,6 @@ like($warn, qr/^none not found/, 'carped about none' );
 ($res, $warn) = catch_warning( \&skipcheck );
 like($warn, qr/^Skipping MANIFEST.SKIP/i, 'warned about MANIFEST.SKIP' );
 
-# tell ExtUtils::Manifest to use a different file
-{
-	local $ExtUtils::Manifest::MANIFEST = 'albatross';
-	($res, $warn) = catch_warning( \&mkmanifest );
-	like( $warn, qr/Added to albatross: /, 'using a new manifest file' );
-
-	# add the new file to the list of files to be deleted
-	$Files{'albatross'}++;
-}
-
 
 # Make sure MANIFEST.SKIP is using complete relative paths
 add_file( 'MANIFEST.SKIP' => "^moretest/q\n" );
@@ -290,13 +276,14 @@ SKIP: {
     add_file( 'foo bar' => "space" )
         or skip "couldn't create spaced test file", 2;
     local $ExtUtils::Manifest::MANIFEST = "albatross";
+    add_file('albatross',<<'EOF');
+foo
+MANIFEST
+EOF
     maniadd({ 'foo bar' => "contains space"});
     is( maniread()->{'foo bar'}, "contains space",
 	'spaced manifest filename' );
     add_file( 'albatross.bak', '' );
-    ($res, $warn) = catch_warning( \&mkmanifest );
-    like( $warn, qr/\A(Added to.*\n)+\z/m,
-	  'no warnings about funky filename' );
     $funky_files{'space'} = 'foo bar';
 }
 
@@ -474,7 +461,10 @@ SKIP: {
 
 
 END {
-	is( unlink( keys %Files ), keys %Files, 'remove all added files' );
+	note "remove all files";
+	for my $file ( sort keys %Files ) {
+		is(( unlink $file ), 1, "Unlink $file") or note "$!";
+	}
 	for my $file ( keys %Files ) { 1 while unlink $file; } # all versions
 	remove_dir( 'moretest', 'copy' );
 

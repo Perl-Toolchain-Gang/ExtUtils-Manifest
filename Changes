@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Re-Architected test suite
 
 1.70  2014-12-31
   - also skip _eumm, an artifact of ExtUtils::MakeMaker 7.05*
