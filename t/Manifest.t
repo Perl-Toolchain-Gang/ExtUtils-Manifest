@@ -14,7 +14,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 96;
+use Test::More tests => 92;
 use Cwd;
 
 use File::Spec;
@@ -132,14 +132,7 @@ add_file( File::Spec->catfile('moretest', 'quux'), 'quux' );
 ok( exists( ExtUtils::Manifest::manifind()->{'moretest/quux'} ),
                                         "manifind found moretest/quux" );
 
-# only MANIFEST and foo are in the manifest
-$_ = 'foo';
 my $files = maniread();
-is( keys %$files, 2, 'two files found' );
-is( join(' ', sort { lc($a) cmp lc($b) } keys %$files), 'foo MANIFEST',
-                                        'both files found' );
-is( $_, 'foo', q{maniread() doesn't clobber $_} );
-
 ok( mkdir( 'copy', 0777 ), 'made copy directory' );
 
 # Check that manicopy copies files.
@@ -159,14 +152,9 @@ foreach my $orig (@copies) {
     is( -x $copy, -x $orig,     "       executable if original was" );
 }
 rmtree('copy');
-
-
-# poison the manifest, and add a comment that should be reported
 add_file( 'MANIFEST', 'none #none' );
-is( ExtUtils::Manifest::maniread()->{none}, '#none',
-                                        'maniread found comment' );
-
 ok( mkdir( 'copy', 0777 ), 'made copy directory' );
+
 $files = maniread();
 eval { (undef, $warn) = catch_warning( sub {
 		manicopy( $files, 'copy', 'cp' ) })
