@@ -74,7 +74,7 @@ sub remove_dir {
 # use module, import functions
 BEGIN {
     use_ok( 'ExtUtils::Manifest',
-            qw( mkmanifest fullcheck
+            qw( mkmanifest
                 maniread manicopy skipcheck maniadd maniskip) );
 }
 
