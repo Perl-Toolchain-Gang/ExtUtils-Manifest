@@ -14,7 +14,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 110;
+use Test::More tests => 100;
 use Cwd;
 
 use File::Spec;
@@ -74,7 +74,7 @@ sub remove_dir {
 # use module, import functions
 BEGIN {
     use_ok( 'ExtUtils::Manifest',
-            qw( mkmanifest manicheck filecheck fullcheck
+            qw( mkmanifest filecheck fullcheck
                 maniread manicopy skipcheck maniadd maniskip) );
 }
 
@@ -106,7 +106,6 @@ ok( ! ExtUtils::Manifest::filecheck(), 'no additional files in directory' );
 
 # after adding bar, the MANIFEST is out of date
 ok( add_file( 'bar' ), 'add another file' );
-ok( ! manicheck(), 'MANIFEST now out of sync' );
 
 # it reports that bar has been added and throws a warning
 ($res, $warn) = catch_warning( \&filecheck );
@@ -201,15 +200,6 @@ add_file( 'MANIFEST.SKIP' => "^moretest/q\n" );
 like( $warn, qr{^Skipping moretest/quux$}i, 'got skipping warning again' );
 
 
-# There was a bug where entries in MANIFEST would be blotted out
-# by MANIFEST.SKIP rules.
-add_file( 'MANIFEST.SKIP' => 'foo' );
-add_file( 'MANIFEST'      => "foobar\n"   );
-add_file( 'foobar'        => '123' );
-($res, $warn) = catch_warning( \&manicheck );
-is( $res,  '',      'MANIFEST overrides MANIFEST.SKIP' );
-is( $warn, '',   'MANIFEST overrides MANIFEST.SKIP, no warnings' );
-
 $files = maniread;
 ok( !$files->{wibble},     'MANIFEST in good state' );
 maniadd({ wibble => undef });
@@ -217,7 +207,6 @@ maniadd({ yarrow => "hock" });
 $files = maniread;
 is( $files->{wibble}, '',    'maniadd() with undef comment' );
 is( $files->{yarrow}, 'hock','          with comment' );
-is( $files->{foobar}, '',    '          preserved old entries' );
 
 my $manicontents = do {
   local $/;
@@ -351,7 +340,7 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
     add_file('MANIFEST.SKIP' =>
              "albatross\n#!include $skip\n#!include_default");
     my ($res, $warn) = catch_warning( \&skipcheck );
-    for (qw(albatross foo foobar mymanifest.skip mydefault.skip)) {
+    for (qw(albatross foo mymanifest.skip mydefault.skip)) {
         like( $warn, qr/Skipping \b$_\b/,
               "Skipping $_" );
     }
@@ -364,7 +353,7 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
 	}
     }
     ($res, $warn) = catch_warning( \&mkmanifest );
-    for (qw(albatross foo foobar mymanifest.skip mydefault.skip)) {
+    for (qw(albatross foo mymanifest.skip mydefault.skip)) {
         like( $warn, qr/Removed from MANIFEST: \b$_\b/,
               "Removed $_ from MANIFEST" );
     }
@@ -380,7 +369,6 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
     ok( ! exists $files->{albatross}, 'albatross excluded via MANIFEST.SKIP' );
     ok( exists $files->{yarrow},      'yarrow included in MANIFEST' );
     ok( exists $files->{bar},         'bar included in MANIFEST' );
-    ok( ! exists $files->{foobar},    'foobar excluded via mymanifest.skip' );
     ok( ! exists $files->{foo},       'foo excluded via mymanifest.skip' );
     ok( ! exists $files->{'mymanifest.skip'},
         'mymanifest.skip excluded via mydefault.skip' );
@@ -394,7 +382,7 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
 	    skip "'$funky_key' not created", 1 unless $funky_file;
 	    ok( ! exists $files->{$funky_file},
 		  "'$funky_file' excluded via mymanifest.skip" );
-	}
+	      }
     }
 
     # tests for maniskip
@@ -406,8 +394,6 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
     is( $skipchk->('bar'), '',
 	'bar included in MANIFEST' );
     $skipchk = maniskip('mymanifest.skip');
-    is( $skipchk->('foobar'), 1,
-	'foobar excluded via mymanifest.skip' );
     is( $skipchk->('foo'), 1,
 	'foo excluded via mymanifest.skip' );
     is( $skipchk->('mymanifest.skip'), '',
@@ -415,8 +401,6 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
     is( $skipchk->('mydefault.skip'), '',
         'mydefault.skip included via mydefault.skip' );
     $skipchk = maniskip('mydefault.skip');
-    is( $skipchk->('foobar'), '',
-	'foobar included via mydefault.skip' );
     is( $skipchk->('foo'), '',
 	'foo included via mydefault.skip' );
     is( $skipchk->('mymanifest.skip'), 1,
