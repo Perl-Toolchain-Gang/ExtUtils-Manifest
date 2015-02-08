@@ -14,7 +14,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 92;
+use Test::More tests => 81;
 use Cwd;
 
 use File::Spec;
@@ -75,7 +75,7 @@ sub remove_dir {
 BEGIN {
     use_ok( 'ExtUtils::Manifest',
             qw( mkmanifest
-                maniread manicopy skipcheck maniadd maniskip) );
+                maniread skipcheck maniadd maniskip) );
 }
 
 my $cwd = Cwd::getcwd();
@@ -87,14 +87,7 @@ ok( mkdir( 'mantest', 0777 ), 'make mantest directory' );
 ok( chdir( 'mantest' ), 'chdir() to mantest' );
 ok( add_file('foo'), 'add a temporary file' );
 
-# This ensures the -x check for manicopy means something
-# Some platforms don't have chmod or an executable bit, in which case
-# this call will do nothing or fail, but on the platforms where chmod()
-# works, we test the executable bit is copied
-chmod( 0744, 'foo') if $Config{'chmod'};
-
 my ($res, $warn);
-
 add_file('MANIFEST',<<'EOF');
 foo
 MANIFEST
@@ -132,38 +125,11 @@ add_file( File::Spec->catfile('moretest', 'quux'), 'quux' );
 ok( exists( ExtUtils::Manifest::manifind()->{'moretest/quux'} ),
                                         "manifind found moretest/quux" );
 
-my $files = maniread();
-ok( mkdir( 'copy', 0777 ), 'made copy directory' );
 
-# Check that manicopy copies files.
-manicopy( $files, 'copy', 'cp' );
-my @copies = ();
-find( sub { push @copies, $_ if -f }, 'copy' );
-@copies = map { s/\.$//; $_ } @copies if $Is_VMS;  # VMS likes to put dots on
-                                                   # the end of files.
-# Have to compare insensitively for non-case preserving VMS
-is_deeply( [sort map { lc } @copies], [sort map { lc } keys %$files] );
-
-# cp would leave files readonly, so check permissions.
-foreach my $orig (@copies) {
-    my $copy = "copy/$orig";
-    ok( -r $copy,               "$copy: must be readable" );
-    is( -w $copy, -w $orig,     "       writable if original was" );
-    is( -x $copy, -x $orig,     "       executable if original was" );
-}
-rmtree('copy');
 add_file( 'MANIFEST', 'none #none' );
-ok( mkdir( 'copy', 0777 ), 'made copy directory' );
 
-$files = maniread();
-eval { (undef, $warn) = catch_warning( sub {
-		manicopy( $files, 'copy', 'cp' ) })
-};
+my $files = maniread();
 
-# a newline comes through, so get rid of it
-chomp($warn);
-# the copy should have given a warning
-like($warn, qr/^none not found/, 'carped about none' );
 ($res, $warn) = catch_warning( \&skipcheck );
 like($warn, qr/^Skipping MANIFEST.SKIP/i, 'warned about MANIFEST.SKIP' );
 
@@ -426,7 +392,7 @@ END {
 		is(( unlink $file ), 1, "Unlink $file") or note "$!";
 	}
 	for my $file ( keys %Files ) { 1 while unlink $file; } # all versions
-	remove_dir( 'moretest', 'copy' );
+	remove_dir( 'moretest');
 
 	# now get rid of the parent directory
 	ok( chdir( $cwd ), 'return to parent directory' );
