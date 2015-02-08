@@ -14,7 +14,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 100;
+use Test::More tests => 96;
 use Cwd;
 
 use File::Spec;
@@ -74,7 +74,7 @@ sub remove_dir {
 # use module, import functions
 BEGIN {
     use_ok( 'ExtUtils::Manifest',
-            qw( mkmanifest filecheck fullcheck
+            qw( mkmanifest fullcheck
                 maniread manicopy skipcheck maniadd maniskip) );
 }
 
@@ -102,16 +102,9 @@ EOF
 
 my @list = read_manifest();
 is( @list, 2, 'check files in MANIFEST' );
-ok( ! ExtUtils::Manifest::filecheck(), 'no additional files in directory' );
 
 # after adding bar, the MANIFEST is out of date
 ok( add_file( 'bar' ), 'add another file' );
-
-# it reports that bar has been added and throws a warning
-($res, $warn) = catch_warning( \&filecheck );
-
-like( $warn, qr/^Not in MANIFEST: bar/, 'warning that bar has been added' );
-is( $res, 'bar', 'bar reported as new' );
 
 # now quiet the warning that bar was added and test again
 ($res, $warn) = do { local $ExtUtils::Manifest::Quiet = 1;
@@ -132,11 +125,6 @@ catch_warning( sub {
 });
 
 is( join( ' ', @skipped ), 'MANIFEST.SKIP', 'listed skipped files' );
-
-{
-	local $ExtUtils::Manifest::Quiet = 1;
-	is( join(' ', filecheck() ), 'bar', 'listing skipped with filecheck()' );
-}
 
 # add a subdirectory and a file there that should be found
 ok( mkdir( 'moretest', 0777 ), 'created moretest directory' );
