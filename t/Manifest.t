@@ -14,7 +14,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 81;
+use Test::More tests => 66;
 use Cwd;
 
 use File::Spec;
@@ -85,64 +85,11 @@ rmtree('mantest');
 
 ok( mkdir( 'mantest', 0777 ), 'make mantest directory' );
 ok( chdir( 'mantest' ), 'chdir() to mantest' );
-ok( add_file('foo'), 'add a temporary file' );
 
 my ($res, $warn);
-add_file('MANIFEST',<<'EOF');
-foo
-MANIFEST
-EOF
-
-my @list = read_manifest();
-is( @list, 2, 'check files in MANIFEST' );
-
-# after adding bar, the MANIFEST is out of date
-ok( add_file( 'bar' ), 'add another file' );
-
-# now quiet the warning that bar was added and test again
-($res, $warn) = do { local $ExtUtils::Manifest::Quiet = 1;
-                     catch_warning( \&skipcheck )
-                };
-is( $warn, '', 'disabled warnings' );
-
-# add a skip file with a rule to skip itself (and the nonexistent glob '*baz*')
-add_file( 'MANIFEST.SKIP', "baz\n.SKIP" );
-
-# this'll skip the new file
-($res, $warn) = catch_warning( \&skipcheck );
-like( $warn, qr/^Skipping MANIFEST\.SKIP/i, 'got skipping warning' );
-
-my @skipped;
-catch_warning( sub {
-	@skipped = skipcheck()
-});
-
-is( join( ' ', @skipped ), 'MANIFEST.SKIP', 'listed skipped files' );
-
-# add a subdirectory and a file there that should be found
-ok( mkdir( 'moretest', 0777 ), 'created moretest directory' );
-add_file( File::Spec->catfile('moretest', 'quux'), 'quux' );
-ok( exists( ExtUtils::Manifest::manifind()->{'moretest/quux'} ),
-                                        "manifind found moretest/quux" );
-
-
 add_file( 'MANIFEST', 'none #none' );
 
-my $files = maniread();
-
-($res, $warn) = catch_warning( \&skipcheck );
-like($warn, qr/^Skipping MANIFEST.SKIP/i, 'warned about MANIFEST.SKIP' );
-
-
-# Make sure MANIFEST.SKIP is using complete relative paths
-add_file( 'MANIFEST.SKIP' => "^moretest/q\n" );
-
-# This'll skip moretest/quux
-($res, $warn) = catch_warning( \&skipcheck );
-like( $warn, qr{^Skipping moretest/quux$}i, 'got skipping warning again' );
-
-
-$files = maniread;
+my $files = maniread;
 ok( !$files->{wibble},     'MANIFEST in good state' );
 maniadd({ wibble => undef });
 maniadd({ yarrow => "hock" });
@@ -310,7 +257,6 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
     my $files = maniread;
     ok( ! exists $files->{albatross}, 'albatross excluded via MANIFEST.SKIP' );
     ok( exists $files->{yarrow},      'yarrow included in MANIFEST' );
-    ok( exists $files->{bar},         'bar included in MANIFEST' );
     ok( ! exists $files->{foo},       'foo excluded via mymanifest.skip' );
     ok( ! exists $files->{'mymanifest.skip'},
         'mymanifest.skip excluded via mydefault.skip' );
@@ -392,7 +338,6 @@ END {
 		is(( unlink $file ), 1, "Unlink $file") or note "$!";
 	}
 	for my $file ( keys %Files ) { 1 while unlink $file; } # all versions
-	remove_dir( 'moretest');
 
 	# now get rid of the parent directory
 	ok( chdir( $cwd ), 'return to parent directory' );
