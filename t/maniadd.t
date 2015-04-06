@@ -3,9 +3,9 @@ use warnings;
 
 use lib 't/lib';
 use ManifestTest qw( catch_warning canon_warning spew runtemp );
-use ExtUtils::Manifest qw( maniadd );
+use ExtUtils::Manifest qw( maniadd maniread );
 use Config;
-use Test::More tests => 7;
+use Test::More tests => 8;
 
 my $LAST_ERROR;
 
@@ -73,3 +73,18 @@ SKIP: {
 
 };
 
+runtemp "maniadd.auto_add_newlines" => sub {
+  note "Ensuring lack of a trailing source newline does not break maniadd";
+  spew( "MANIFEST", "initial_content" );
+  maniadd( { "newfile", "newcomment" } );
+
+  my $read = maniread;
+
+  # VMS downcases the MANIFEST.  We normalize it here to match.
+  my (%got) = map { lc $_ => $read->{$_} } keys %{$read};
+  my (%expected) = (
+    "initial_content" => "",
+    "newfile"         => "newcomment"
+  );
+  is_deeply( \%got, \%expected, "maniadd added new entries to MANIFEST with newline included" );
+};

@@ -14,7 +14,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 64;
+use Test::More tests => 63;
 use Cwd;
 
 use File::Spec;
@@ -299,19 +299,6 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
     my $extsep = $Is_VMS_noefs ? '_' : '.';
     $Files{"$_.bak"}++ for ('MANIFEST', "MANIFEST${extsep}SKIP");
 }
-
-add_file('MANIFEST'   => 'Makefile.PL');
-maniadd({ foo  => 'bar' });
-$files = maniread;
-# VMS downcases the MANIFEST.  We normalize it here to match.
-%$files = map { (lc $_ => $files->{$_}) } keys %$files;
-my %expect = ( 'makefile.pl' => '',
-               'foo'    => 'bar'
-             );
-is_deeply( $files, \%expect, 'maniadd() vs MANIFEST without trailing newline');
-
-#add_file('MANIFEST'   => 'Makefile.PL');
-#maniadd({ foo => 'bar' });
 
 END {
 	note "remove all files";
