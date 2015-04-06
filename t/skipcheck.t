@@ -5,7 +5,7 @@ use lib 't/lib';
 use ManifestTest qw( catch_warning canon_warning spew slurp runtemp );
 use ExtUtils::Manifest qw( skipcheck );
 use Cwd qw();
-use Test::More tests => 37;
+use Test::More tests => 40;
 
 # Yes, most of these cases do the same thing.
 # skipcheck doesn't do anything in any of the below cases.
@@ -156,6 +156,25 @@ runtemp "skipcheck.include_default" => sub {
   };
   cmp_ok( scalar @items, '==', 1,          'Exactly one skip result' );
   cmp_ok( lc $items[0],  'eq', 'makefile', "report skipping Makefile" );
+  like( canon_warning($warn), qr/^Skipping Makefile\|/i, 'Warning expected' );
+
+};
+
+runtemp "skipcheck.include_default_noeol" => sub {
+  note "ensuring #include_default works in skipcheck with unterminated files";
+  local $TODO = "Broken, GH #14";
+  spew( 'MANIFEST',        '' );
+  spew( 'Makefile',        '' );
+  spew( 'mymanifest.skip', "Makefile" );
+  spew( 'MANIFEST.SKIP',   "#!include_default" );
+
+  my (@items);
+  my ( $exit, $warn ) = catch_warning sub {
+    local $ExtUtils::Manifest::DEFAULT_MSKIP = File::Spec->catfile( Cwd::getcwd, 'mymanifest.skip' );
+    @items = skipcheck;
+  };
+  cmp_ok( scalar @items, '==', 1, 'Exactly one skip result' );
+  cmp_ok( lc( $items[0] || '' ), 'eq', 'makefile', "report skipping Makefile" );
   like( canon_warning($warn), qr/^Skipping Makefile\|/i, 'Warning expected' );
 
 };
