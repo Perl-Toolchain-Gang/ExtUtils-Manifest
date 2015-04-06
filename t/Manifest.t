@@ -14,7 +14,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 66;
+use Test::More tests => 64;
 use Cwd;
 
 use File::Spec;
@@ -312,25 +312,6 @@ is_deeply( $files, \%expect, 'maniadd() vs MANIFEST without trailing newline');
 
 #add_file('MANIFEST'   => 'Makefile.PL');
 #maniadd({ foo => 'bar' });
-
-SKIP: {
-    chmod( 0400, 'MANIFEST' );
-    skip "Can't make MANIFEST read-only", 2 if -w 'MANIFEST' or $Config{osname} eq 'cygwin';
-
-    eval {
-        maniadd({ 'foo' => 'bar' });
-    };
-    is( $@, '',  "maniadd() won't open MANIFEST if it doesn't need to" );
-
-    eval {
-        maniadd({ 'grrrwoof' => 'yippie' });
-    };
-    like( $@, qr/^\Qmaniadd() could not open MANIFEST:\E/,
-                 "maniadd() dies if it can't open the MANIFEST" );
-
-    chmod( 0600, 'MANIFEST' );
-}
-
 
 END {
 	note "remove all files";
