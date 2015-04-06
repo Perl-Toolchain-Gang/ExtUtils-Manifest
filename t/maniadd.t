@@ -5,7 +5,7 @@ use lib 't/lib';
 use ManifestTest qw( catch_warning canon_warning spew runtemp );
 use ExtUtils::Manifest qw( maniadd );
 use Config;
-use Test::More tests => 5;
+use Test::More tests => 7;
 
 my $LAST_ERROR;
 
@@ -51,3 +51,25 @@ SKIP: {
   }
 
 };
+
+runtemp "maniadd.unneeded_readonly_notrailingeol" => sub {
+  note "Ensuring maniadd does not arbitrarily make a file writeable if it lacks an EOL";
+  local $TODO = "Broken, GH #13";
+  spew( "MANIFEST", "foo #bar" );
+SKIP: {
+    chmod( 0400, "MANIFEST" );
+
+    if ( -w "MANIFEST" or $Config{osname} eq "cygwin" ) {
+      skip "Cant make manifest readonly", 5;
+    }
+    ok( !fatal { maniadd( { "foo" => "bar" } ) }, "maniadd() wont die adding an existing key" )
+      or diag $LAST_ERROR;
+
+    ok( !-w "MANIFEST", "MANIFEST is still readonly" );
+
+    chmod( 0600, "MANIFEST" );
+
+  }
+
+};
+
