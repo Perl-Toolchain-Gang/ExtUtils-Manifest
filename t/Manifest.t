@@ -14,7 +14,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 63;
+use Test::More tests => 36;
 use Cwd;
 
 use File::Spec;
@@ -148,114 +148,27 @@ is index($manicontents, "\015\012"), -1, 'MANIFEST no CRLF';
     rename "MANIFEST.bak", "MANIFEST" or die "Could not rename MANIFEST.bak to MANIFEST: $!";
 }
 
-my %funky_files;
-# test including a filename with a space
-SKIP: {
-    add_file( 'foo bar' => "space" )
-        or skip "couldn't create spaced test file", 2;
-    local $ExtUtils::Manifest::MANIFEST = "albatross";
-    add_file('albatross',<<'EOF');
-foo
-MANIFEST
-EOF
-    maniadd({ 'foo bar' => "contains space"});
-    is( maniread()->{'foo bar'}, "contains space",
-	'spaced manifest filename' );
-    add_file( 'albatross.bak', '' );
-    $funky_files{'space'} = 'foo bar';
-}
-
-# test including a filename with a space and a quote
-SKIP: {
-    add_file( 'foo\' baz\'quux' => "quote" )
-        or skip "couldn't create quoted test file", 1;
-    local $ExtUtils::Manifest::MANIFEST = "albatross";
-    maniadd({ 'foo\' baz\'quux' => "contains quote"});
-    is( maniread()->{'foo\' baz\'quux'}, "contains quote",
-	'quoted manifest filename' );
-    $funky_files{'space_quote'} = 'foo\' baz\'quux';
-}
-
-# test including a filename with a space and a backslash
-SKIP: {
-    add_file( 'foo bar\\baz' => "backslash" )
-        or skip "couldn't create backslash test file", 1;
-    local $ExtUtils::Manifest::MANIFEST = "albatross";
-    maniadd({ 'foo bar\\baz' => "contains backslash"});
-    is( maniread()->{'foo bar\\baz'}, "contains backslash",
-	'backslashed manifest filename' );
-    $funky_files{'space_backslash'} = 'foo bar\\baz';
-}
-
-# test including a filename with a space, quote, and a backslash
-SKIP: {
-    add_file( 'foo bar\\baz\'quux' => "backslash/quote" )
-        or skip "couldn't create backslash/quote test file", 1;
-    local $ExtUtils::Manifest::MANIFEST = "albatross";
-    maniadd({ 'foo bar\\baz\'quux' => "backslash and quote"});
-    is( maniread()->{'foo bar\\baz\'quux'}, "backslash and quote",
-	'backslashed and quoted manifest filename' );
-    $funky_files{'space_quote_backslash'} = 'foo bar\\baz\'quux';
-}
-
-# test including a filename which is itself a quoted string
-# https://rt.perl.org/Ticket/Display.html?id=122415
-SKIP: {
-    my $quoted_filename = q{'quoted name.txt'};
-    my $description     = "quoted string";
-    add_file( $quoted_filename  => $description )
-        or skip "couldn't create $description test file", 1;
-    local $ExtUtils::Manifest::MANIFEST = "albatross";
-    maniadd({ $quoted_filename => $description });
-    is( maniread()->{$quoted_filename}, $description,
-     'file whose name starts and ends with quotes' );
-    $funky_files{$description} = $quoted_filename;
-}
-
-my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
 # test including an external manifest.skip file in MANIFEST.SKIP
 {
-    maniadd({ foo => undef , albatross => undef,
-              'mymanifest.skip' => undef, 'mydefault.skip' => undef});
-    for (@funky_keys) {
-        maniadd( {$funky_files{$_} => $_} ) if defined $funky_files{$_};
-    }
-
+    maniadd({ foo => undef , 'mymanifest.skip' => undef, 'mydefault.skip' => undef});
+    add_file('foo' => 'Blah');
     add_file('mymanifest.skip' => "^foo\n");
     add_file('mydefault.skip'  => "^my\n");
     local $ExtUtils::Manifest::DEFAULT_MSKIP =
          File::Spec->catfile($cwd, qw(mantest mydefault.skip));
     my $skip = File::Spec->catfile($cwd, qw(mantest mymanifest.skip));
-    add_file('MANIFEST.SKIP' =>
-             "albatross\n#!include $skip\n#!include_default");
+    add_file('MANIFEST.SKIP' =>  "#!include $skip\n#!include_default");
     my ($res, $warn) = catch_warning( \&skipcheck );
-    for (qw(albatross foo mymanifest.skip mydefault.skip)) {
+    for (qw(foo mymanifest.skip mydefault.skip)) {
         like( $warn, qr/Skipping \b$_\b/,
               "Skipping $_" );
     }
-    for my $funky_key (@funky_keys) {
-        SKIP: {
-            my $funky_file = $funky_files{$funky_key};
-	    skip "'$funky_key' not created", 1 unless $funky_file;
-	    like( $warn, qr/Skipping \b\Q$funky_file\E\b/,
-	      "Skipping $funky_file");
-	}
-    }
     ($res, $warn) = catch_warning( \&mkmanifest );
-    for (qw(albatross foo mymanifest.skip mydefault.skip)) {
+    for (qw(foo mymanifest.skip mydefault.skip)) {
         like( $warn, qr/Removed from MANIFEST: \b$_\b/,
               "Removed $_ from MANIFEST" );
     }
-    for my $funky_key (@funky_keys) {
-        SKIP: {
-            my $funky_file = $funky_files{$funky_key};
-	    skip "'$funky_key' not created", 1 unless $funky_file;
-	    like( $warn, qr/Removed from MANIFEST: \b\Q$funky_file\E\b/,
-	      "Removed $funky_file from MANIFEST");
-	}
-    }
     my $files = maniread;
-    ok( ! exists $files->{albatross}, 'albatross excluded via MANIFEST.SKIP' );
     ok( exists $files->{yarrow},      'yarrow included in MANIFEST' );
     ok( ! exists $files->{foo},       'foo excluded via mymanifest.skip' );
     ok( ! exists $files->{'mymanifest.skip'},
@@ -263,20 +176,8 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
     ok( ! exists $files->{'mydefault.skip'},
         'mydefault.skip excluded via mydefault.skip' );
 
-    # test exclusion of funky files
-    for my $funky_key (@funky_keys) {
-        SKIP: {
-            my $funky_file = $funky_files{$funky_key};
-	    skip "'$funky_key' not created", 1 unless $funky_file;
-	    ok( ! exists $files->{$funky_file},
-		  "'$funky_file' excluded via mymanifest.skip" );
-	      }
-    }
-
     # tests for maniskip
     my $skipchk = maniskip();
-    is ( $skipchk->('albatross'), 1,
-	'albatross excluded via MANIFEST.SKIP' );
     is( $skipchk->('yarrow'), '',
 	'yarrow included in MANIFEST' );
     is( $skipchk->('bar'), '',
