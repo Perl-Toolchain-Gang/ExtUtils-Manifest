@@ -1,6 +1,7 @@
 Revision history for ExtUtils-Manifest
 
 {{$NEXT}}
+  - #!include_default now memory-only, not changing MANIFEST.SKIP file.
 
 1.73  2021-01-16
   - Calculate absolute path to MANIFEST.SKIP (in $DEFAULT_MSKIP) at module
