@@ -404,6 +404,20 @@ a given filename should be skipped.
 
 =cut
 
+sub _process_skipline {
+    local $_ = shift;
+    chomp;
+    s/\r//;
+    $_ =~ qr{^\s*(?:(?:'([^\\']*(?:\\.[^\\']*)*)')|([^#\s]\S*))?(?:(?:\s*)|(?:\s+(.*?)\s*))$};
+    #my $comment = $3;
+    my $filename = $2;
+    if ( defined($1) ) {
+      $filename = $1;
+      $filename =~ s/\\(['\\])/$1/g;
+    }
+    $filename;
+}
+
 # returns an anonymous sub that decides if an argument matches
 sub maniskip {
     my @skip ;
@@ -412,16 +426,14 @@ sub maniskip {
     local(*M, $_);
     open M, "< $mfile" or open M, "< $DEFAULT_MSKIP" or return sub {0};
     while (<M>){
-      chomp;
-      s/\r//;
-      $_ =~ qr{^\s*(?:(?:'([^\\']*(?:\\.[^\\']*)*)')|([^#\s]\S*))?(?:(?:\s*)|(?:\s+(.*?)\s*))$};
-      #my $comment = $3;
-      my $filename = $2;
-      if ( defined($1) ) {
-        $filename = $1;
-        $filename =~ s/\\(['\\])/$1/g;
+      if (/^#!include_default\s*$/) {
+          if (my @default = _include_mskip_file()) {
+              warn "Debug: Including default MANIFEST.SKIP\n" if $Debug;
+              push @skip, grep $_, map _process_skipline($_), @default;
+          }
+          next;
       }
-      next if (not defined($filename) or not $filename);
+      next unless my $filename = _process_skipline($_);
       push @skip, _macify($filename);
     }
     close M;
@@ -452,14 +464,6 @@ sub _check_mskip_directives {
         return;
     }
     while (<M>) {
-        if (/^#!include_default\s*$/) {
-	    if (my @default = _include_mskip_file()) {
-	        push @lines, @default;
-		warn "Debug: Including default MANIFEST.SKIP\n" if $Debug;
-		$flag++;
-	    }
-	    next;
-        }
 	if (/^#!include\s+(.*)\s*$/) {
 	    my $external_file = $1;
 	    if (my @external = _include_mskip_file($external_file)) {
@@ -809,11 +813,17 @@ files. At present two such directives are recognized.
 
 =item #!include_default
 
-This inserts the contents of the default MANIFEST.SKIP file
+This tells ExtUtils::Manifest to read the default F<MANIFEST.SKIP>
+file and skip files accordingly, but I<not> to include it in the local
+F<MANIFEST.SKIP>. This is intended to skip files according to a system
+default, which can change over time without requiring further changes
+to the distribution's F<MANIFEST.SKIP>.
 
 =item #!include /Path/to/another/manifest.skip
 
-This inserts the contents of the specified external file
+This inserts the contents of the specified external file in the local
+F<MANIFEST.SKIP>. This is intended for authors to have a central
+F<MANIFEST.SKIP> file, and to include it with their various distributions.
 
 =back
 

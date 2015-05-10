@@ -1,6 +1,7 @@
 Revision history for ExtUtils-Manifest
 
 {{$NEXT}}
+  - #!include_default now memory-only, not changing MANIFEST.SKIP file.
 
 1.72  2019-03-10
   - also skip META_new.* (thanks, brian d foy!)
