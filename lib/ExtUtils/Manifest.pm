@@ -61,7 +61,7 @@ our $DEFAULT_MSKIP = File::Spec->catfile( dirname(__FILE__), "$MANIFEST.SKIP" );
 
 =head1 NAME
 
-ExtUtils::Manifest - utilities to write and check a MANIFEST file
+ExtUtils::Manifest - Utilities to write and check a MANIFEST file
 
 =head1 SYNOPSIS
 
