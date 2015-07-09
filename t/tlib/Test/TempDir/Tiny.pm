@@ -24,41 +24,8 @@ my ( $ROOT_DIR, $TEST_DIR, %COUNTER );
 my ( $ORIGINAL_PID, $ORIGINAL_CWD, $TRIES, $DELAY, $SYSTEM_TEMP ) =
   ( $$, abs_path("."), 100, 50 / 1000, 0 );
 
-=func tempdir
-
-    $dir = tempdir();          # .../default_1/
-    $dir = tempdir("label");   # .../label_1/
-
-Creates a directory underneath a test-file-specific temporary directory and
-returns the absolute path to it in platform-native form (i.e. with backslashes
-on Windows).
-
-The function takes a single argument as a label for the directory or defaults
-to "default". An incremental counter value will be appended to allow a label to
-be used within a loop with distinct temporary directories:
-
-    # t/foo.t
-
-    for ( 1 .. 3 ) {
-        tempdir("in loop");
-    }
-
-    # creates:
-    #   ./tmp/t_foo_t/in_loop_1
-    #   ./tmp/t_foo_t/in_loop_2
-    #   ./tmp/t_foo_t/in_loop_3
-
-If the label contains any characters besides alphanumerics, underscore
-and dash, they will be collapsed and replaced with a single underscore.
-
-    $dir = tempdir("a space"); # .../a_space_1/
-    $dir = tempdir("a!bang");  # .../a_bang_1/
-
-The test-file-specific directory and all directories within it will be cleaned
-up with an END block if the current test file passes tests.
-
-=cut
-
+# $dir = tempdir();          # .../default_1/
+# $dir = tempdir("label");   # .../label_1/
 sub tempdir {
     my $label = defined( $_[0] ) ? $_[0] : 'default';
     $label =~ tr{a-zA-Z0-9_-}{_}cs;
@@ -70,26 +37,10 @@ sub tempdir {
     return $subdir;
 }
 
-=func in_tempdir
-
-    in_tempdir "label becomes name" => sub {
-        my $cwd = shift;
-        # this happens in tempdir
-    };
-
-Given a label and a code reference, creates a temporary directory based on the
-label (following the rules of L</tempdir>), changes to that directory, runs the
-code, then changes back to the original directory.
-
-The temporary directory path is given as an argument to the code reference.
-The code runs in the same context as C<in_tempdir> and C<in_tempdir> returns
-the return value(s) from the code.
-
-When the code finishes (even if it dies), C<in_tempdir> will change back to the
-original directory if it can, to the root if it can't, and will rethrow any
-fatal errors.
-
-=cut
+# in_tempdir "label becomes name" => sub {
+#        my $cwd = shift;
+#        # this happens in tempdir
+#  };
 
 sub in_tempdir {
     my ( $label, $code ) = @_;
@@ -224,83 +175,5 @@ END {
 }
 
 1;
-
-=head1 SYNOPSIS
-
-    # t/foo.t
-    use Test::More;
-    use Test::TempDir::Tiny;
-
-    # default tempdirs
-    $dir = tempdir();          # ./tmp/t_foo_t/default_1/
-    $dir = tempdir();          # ./tmp/t_foo_t/default_2/
-
-    # labeled tempdirs
-    $dir = tempdir("label");   # ./tmp/t_foo_t/label_1/
-    $dir = tempdir("label");   # ./tmp/t_foo_t/label_2/
-
-    # labels with spaces and non-word characters
-    $dir = tempdir("bar baz")  # ./tmp/t_foo_t/bar_baz_1/
-    $dir = tempdir("!!!bang")  # ./tmp/t_foo_t/_bang_1/
-
-    # run code in a temporary directory
-    in_tempdir "label becomes name" => sub {
-        my $cwd = shift;
-        # do stuff in a tempdir
-    };
-
-=head1 DESCRIPTION
-
-This module works with L<Test::More> to create temporary directories that stick
-around if tests fail.
-
-It is loosely based on L<Test::TempDir>, but with less complexity, greater
-portability and zero non-core dependencies.  (L<Capture::Tiny> is recommended
-for testing.)
-
-The L</tempdir> and L</in_tempdir> functions are exported by default.
-
-If the current directory is writable, the root for directories will be
-F<./tmp>.  Otherwise, a L<File::Temp> directory will be created wherever
-temporary directories are stored for your system.
-
-Every F<*.t> file gets its own subdirectory under the root based on the test
-filename, but with slashes and periods replaced with underscores.  For example,
-F<t/foo.t> would get a test-file-specific subdirectory F<./tmp/t_foo_t/>.
-Directories created by L</tempdir> get put in that directory.  This makes it
-very easy to find files later if tests fail.
-
-The test-file-specific name is consistent from run-to-run.  If an old directory
-already exists, it will be removed.
-
-When the test file exits, if all tests passed, then the test-file-specific
-directory is recursively removed.
-
-If a test failed and the root directory is F<./tmp>, the test-file-specific
-directory sticks around for inspection.  (But if the root is a L<File::Temp>
-directory, it is always discarded).
-
-If nothing is left in F<./tmp> (i.e. no other test file failed), then F<./tmp>
-is cleaned up as well (unless it's a symlink).
-
-This module attempts to avoid race conditions due to parallel testing.  In
-extreme cases, the test-file-specific subdirectory might be created as a
-regular L<File::Temp> directory rather than in F<./tmp>.  In such a case,
-a warning will be issued.
-
-=head1 ENVIRONMENT
-
-=head2 C<PERL_TEST_TEMPDIR_TINY_NOCLEANUP>
-
-When this environment variable is true, directories will not be cleaned up,
-even if tests pass.
-
-=head1 SEE ALSO
-
-=for :list
-* L<File::Temp>
-* L<Path::Tiny>
-
-=cut
 
 # vim: ts=4 sts=4 sw=4 et:
