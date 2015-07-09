@@ -1,4 +1,7 @@
-/.*
+/.ackrc
+/.build/
+!/.gitignore
+/.latest
 !/.gitignore
 !/.travis.yml
 /ExtUtils-Manifest-*/
