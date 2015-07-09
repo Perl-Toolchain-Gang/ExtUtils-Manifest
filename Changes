@@ -1,6 +1,7 @@
 Revision history for ExtUtils-Manifest
 
 {{$NEXT}}
+  - #!include_default now memory-only, not changing MANIFEST.SKIP file.
 
 1.70  2014-12-31
   - also skip _eumm, an artifact of ExtUtils::MakeMaker 7.05*
