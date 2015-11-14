@@ -8,6 +8,8 @@
 \B\.gitignore\b
 \b_darcs\b
 \B\.cvsignore$
+^\.git.*
+
 
 # Avoid VMS specific MakeMaker generated files
 \bDescrip.MMS$
@@ -61,3 +63,6 @@
 
 # Avoid MYMETA files
 ^MYMETA\.
+
+# Avoid travis-ci.org file
+^\.travis.yml
