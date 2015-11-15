@@ -2,7 +2,6 @@
 /.build/
 !/.gitignore
 /.latest
-!/.gitignore
 !/.travis.yml
 /ExtUtils-Manifest-*/
 /ExtUtils-Manifest-*.tar.gz
