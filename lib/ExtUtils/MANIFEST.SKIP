@@ -62,6 +62,9 @@
 # Avoid MYMETA files
 ^MYMETA\.
 
+# Temp files for new META
+^META_new\.(?:json|yml)
+
 # Avoid travis-ci.org file
 ^\.travis.yml
 
