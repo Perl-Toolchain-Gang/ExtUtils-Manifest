@@ -64,3 +64,6 @@
 
 # Avoid travis-ci.org file
 ^\.travis.yml
+
+# Avoid appveyor.com file
+^\.appveyor.yml

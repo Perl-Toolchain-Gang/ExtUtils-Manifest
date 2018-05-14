@@ -1,4 +1,5 @@
 /.ackrc
+!/.appveyor.yml
 /.build/
 !/.gitignore
 /.latest
