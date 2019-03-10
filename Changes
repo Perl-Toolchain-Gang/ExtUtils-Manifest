@@ -1,6 +1,7 @@
 Revision history for ExtUtils-Manifest
 
 {{$NEXT}}
+  - also skip META_new.* (thanks, brian d foy!)
 
 1.71  2018-05-15
   - also skip .travis.yml (thanks, Jerome Eteve!)
