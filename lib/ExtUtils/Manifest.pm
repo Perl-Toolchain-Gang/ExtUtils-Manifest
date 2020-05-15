@@ -56,7 +56,7 @@ our $Verbose = defined $ENV{PERL_MM_MANIFEST_VERBOSE} ?
 our $Quiet = 0;
 our $MANIFEST = 'MANIFEST';
 
-our $DEFAULT_MSKIP = File::Spec->catfile( dirname(__FILE__), "$MANIFEST.SKIP" );
+our $DEFAULT_MSKIP = File::Spec->rel2abs(File::Spec->catfile( dirname(__FILE__), "$MANIFEST.SKIP" ));
 
 
 =head1 NAME
