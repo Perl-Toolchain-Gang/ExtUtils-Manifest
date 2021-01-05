@@ -5,6 +5,7 @@
 ,v$
 \B\.svn\b
 \B\.git\b
+^\.github\b
 \B\.gitignore\b
 \b_darcs\b
 \B\.cvsignore$
