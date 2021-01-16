@@ -52,6 +52,8 @@
 \B\.DS_Store
 # Mac OSX SMB mount metadata files
 \B\._
+# Placeholder files created when iCloud will "optimize Mac storage"
+\.i[cC]loud$
 
 # Avoid Devel::Cover and Devel::CoverX::Covered files.
 \bcover_db\b
