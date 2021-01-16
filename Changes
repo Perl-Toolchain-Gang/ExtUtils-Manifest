@@ -1,6 +1,9 @@
 Revision history for ExtUtils-Manifest
 
 {{$NEXT}}
+  - Calculate absolute path to MANIFEST.SKIP (in $DEFAULT_MSKIP) at module
+    load time, where __FILE__ is guaranteed to valid.
+  - skip github and iCloud files
 
 1.72  2019-03-10
   - also skip META_new.* (thanks, brian d foy!)
