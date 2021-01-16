@@ -1,5 +1,7 @@
 Revision history for ExtUtils-Manifest
 
+{{$NEXT}}
+
 1.73  2021-01-16
   - Calculate absolute path to MANIFEST.SKIP (in $DEFAULT_MSKIP) at module
     load time, where __FILE__ is guaranteed to valid.
