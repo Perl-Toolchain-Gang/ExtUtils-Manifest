@@ -501,10 +501,10 @@ sub _include_mskip_file {
         return;
     }
     my @lines = ();
-    push @lines, "\n#!start included $mskip\n";
+    push @lines, "\n", "#!start included $mskip\n";
     push @lines, $_ while <M>;
     close M;
-    push @lines, "#!end included $mskip\n\n";
+    push @lines, "#!end included $mskip\n", "\n";
     return @lines;
 }
 
