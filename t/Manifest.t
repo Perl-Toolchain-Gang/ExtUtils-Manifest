@@ -13,7 +13,7 @@ BEGIN {
 }
 chdir 't';
 
-use Test::More tests => 98;
+use Test::More tests => 99;
 use Cwd;
 
 use File::Spec;
@@ -438,6 +438,13 @@ my @funky_keys = qw(space space_quote space_backslash space_quote_backslash);
 
     my $extsep = $Is_VMS_noefs ? '_' : '.';
     $Files{"$_.bak"}++ for ('MANIFEST', "MANIFEST${extsep}SKIP");
+
+    my $mskip_contents = do {
+        local $/;
+        open my $fh, '<', "MANIFEST${extsep}SKIP" or return;
+        <$fh>;
+    };
+    unlike $mskip_contents, qr{^\Q^my\E}m, 'include_default memory-only';
 }
 
 add_file('MANIFEST'   => 'Makefile.PL');
