@@ -116,12 +116,11 @@ sub mkmanifest {
     my $manimiss = 0;
     my $read = (-r 'MANIFEST' && maniread()) or $manimiss++;
     $read = {} if $manimiss;
-    local *M;
     my $bakbase = $MANIFEST;
     $bakbase =~ s/\./_/g if $Is_VMS_nodot; # avoid double dots
     rename $MANIFEST, "$bakbase.bak" unless $manimiss;
-    open M, "> $MANIFEST" or die "Could not open $MANIFEST: $!";
-    binmode M, ':raw';
+    open my $fh, "> $MANIFEST" or die "Could not open $MANIFEST: $!";
+    binmode $fh, ':raw';
     my $skip = maniskip();
     my $found = manifind();
     my($key,$val,$file,%all);
@@ -148,9 +147,8 @@ sub mkmanifest {
             $file =~ s/([\\'])/\\$1/g;
             $file = "'$file'";
         }
-        print M $file, "\t" x $tabs, $text, "\n";
+        print $fh $file, "\t" x $tabs, $text, "\n";
     }
-    close M;
 }
 
 # Geez, shouldn't this use File::Spec or File::Basename or something?
@@ -340,13 +338,13 @@ sub maniread {
     my ($mfile) = @_;
     $mfile ||= $MANIFEST;
     my $read = {};
-    local *M;
-    unless (open M, "< $mfile"){
+    my $fh;
+    unless (open $fh, "< $mfile"){
         warn "Problem opening $mfile: $!";
         return $read;
     }
     local $_;
-    while (<M>){
+    while (<$fh>){
         chomp;
         next if /^\s*#/;
 
@@ -387,7 +385,6 @@ sub maniread {
 
         $read->{$file} = $comment;
     }
-    close M;
     $read;
 }
 
@@ -423,9 +420,10 @@ sub maniskip {
     my @skip ;
     my $mfile = shift || "$MANIFEST.SKIP";
     _check_mskip_directives($mfile) if -f $mfile;
-    local(*M, $_);
-    open M, "< $mfile" or open M, "< $DEFAULT_MSKIP" or return sub {0};
-    while (<M>){
+    local $_;
+    my $fh;
+    open $fh, "< $mfile" or open $fh, "< $DEFAULT_MSKIP" or return sub {0};
+    while (<$fh>){
         if (/^#!include_default\s*$/) {
             if (my @default = _include_mskip_file()) {
                 warn "Debug: Including default MANIFEST.SKIP\n" if $Debug;
@@ -436,7 +434,6 @@ sub maniskip {
         next unless my $filename = _process_skipline($_);
         push @skip, _macify($filename);
     }
-    close M;
     return sub {0} unless (scalar @skip > 0);
 
     my $opts = $Is_VMS_mode ? '(?i)' : '';
@@ -460,14 +457,15 @@ sub _get_homedir {
 # and an external manifest.skip file
 sub _check_mskip_directives {
     my $mfile = shift;
-    local (*M, $_);
+    local $_;
+    my $fh;
     my @lines = ();
     my $flag = 0;
-    unless (open M, "< $mfile") {
+    unless (open $fh, "< $mfile") {
         warn "Problem opening $mfile: $!";
         return;
     }
-    while (<M>) {
+    while (<$fh>) {
         if (/^#!include\s+(.*)\s*$/) {
             my $external_file = $1;
             $external_file =~ s/^~/_get_homedir()/e;
@@ -480,19 +478,18 @@ sub _check_mskip_directives {
         }
         push @lines, $_;
     }
-    close M;
+    close $fh;
     return unless $flag;
     my $bakbase = $mfile;
     $bakbase =~ s/\./_/g if $Is_VMS_nodot;  # avoid double dots
     rename $mfile, "$bakbase.bak";
     warn "Debug: Saving original $mfile as $bakbase.bak\n" if $Debug;
-    unless (open M, "> $mfile") {
+    unless (open $fh, "> $mfile") {
         warn "Problem opening $mfile: $!";
         return;
     }
-    binmode M, ':raw';
-    print M $_ for (@lines);
-    close M;
+    binmode $fh, ':raw';
+    print $fh $_ for (@lines);
     return;
 }
 
@@ -504,15 +501,15 @@ sub _include_mskip_file {
         warn qq{Included file "$mskip" not found - skipping};
         return;
     }
-    local (*M, $_);
-    unless (open M, "< $mskip") {
+    local $_;
+    my $fh;
+    unless (open $fh, "< $mskip") {
         warn "Problem opening $mskip: $!";
         return;
     }
     my @lines = ();
     push @lines, "\n#!start included $mskip\n";
-    push @lines, $_ while <M>;
-    close M;
+    push @lines, $_ while <$fh>;
     push @lines, "#!end included $mskip\n\n";
     return @lines;
 }
@@ -574,16 +571,16 @@ sub cp_if_diff {
         return;
     }
     my($diff) = 0;
-    local(*F,*T);
-    open(F,"< $from\0") or die "Can't read $from: $!\n";
-    if (open(T,"< $to\0")) {
+    my ($fromfh, $tofh);
+    open($fromfh, "< $from\0") or die "Can't read $from: $!\n";
+    if (open($tofh, "< $to\0")) {
         local $_;
-        while (<F>) { $diff++,last if $_ ne <T>; }
-        $diff++ unless eof(T);
-        close T;
+        while (<$fromfh>) { $diff++,last if $_ ne <$tofh>; }
+        $diff++ unless eof($tofh);
+        close $tofh;
     }
     else { $diff++; }
-    close F;
+    close $fromfh;
     if ($diff) {
         if (-e $to) {
             unlink($to) or confess "unlink $to: $!";
@@ -702,9 +699,9 @@ sub maniadd {
     my @needed = grep !exists $manifest->{$_}, keys %$additions;
     return 1 unless @needed;
 
-    open(MANIFEST, ">>$MANIFEST") or
+    open(my $fh, ">>$MANIFEST") or
       die "maniadd() could not open $MANIFEST: $!";
-    binmode MANIFEST, ':raw';
+    binmode $fh, ':raw';
 
     foreach my $file (_sort @needed) {
         my $comment = $additions->{$file} || '';
@@ -712,9 +709,9 @@ sub maniadd {
             $file =~ s/([\\'])/\\$1/g;
             $file = "'$file'";
         }
-        printf MANIFEST "%-40s %s\n", $file, $comment;
+        printf $fh "%-40s %s\n", $file, $comment;
     }
-    close MANIFEST or die "Error closing $MANIFEST: $!";
+    close $fh or die "Error closing $MANIFEST: $!";
 
     return 1;
 }
@@ -725,10 +722,10 @@ sub maniadd {
 sub _fix_manifest {
     my $manifest_file = shift;
 
-    open MANIFEST, $MANIFEST or die "Could not open $MANIFEST: $!";
+    open my $fh, $MANIFEST or die "Could not open $MANIFEST: $!";
     local $/;
-    my @manifest = split /(\015\012|\012|\015)/, <MANIFEST>, -1;
-    close MANIFEST;
+    my @manifest = split /(\015\012|\012|\015)/, <$fh>, -1;
+    close $fh;
     my $must_rewrite = "";
     if ($manifest[-1] eq ""){
         # sane case: last line had a terminal newline
@@ -745,12 +742,12 @@ sub _fix_manifest {
 
     if ( $must_rewrite ) {
         1 while unlink $MANIFEST; # avoid multiple versions on VMS
-        open MANIFEST, ">", $MANIFEST or die "(must_rewrite=$must_rewrite) Could not open >$MANIFEST: $!";
-        binmode MANIFEST, ':raw';
+        open $fh, ">", $MANIFEST or die "(must_rewrite=$must_rewrite) Could not open >$MANIFEST: $!";
+        binmode $fh, ':raw';
         for (my $i=0; $i<=$#manifest; $i+=2) {
-            print MANIFEST "$manifest[$i]\n";
+            print $fh "$manifest[$i]\n";
         }
-        close MANIFEST or die "could not write $MANIFEST: $!";
+        close $fh or die "could not write $MANIFEST: $!";
     }
 }
 
