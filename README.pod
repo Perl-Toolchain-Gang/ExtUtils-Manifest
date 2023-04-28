@@ -6,7 +6,7 @@ ExtUtils::Manifest - Utilities to write and check a MANIFEST file
 
 =head1 VERSION
 
-version 1.73
+version 1.74
 
 =head1 SYNOPSIS
 
