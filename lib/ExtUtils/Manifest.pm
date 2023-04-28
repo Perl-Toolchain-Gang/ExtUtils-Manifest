@@ -448,6 +448,10 @@ sub maniskip {
     return sub { $_[0] =~ qr{$opts$regex} };
 }
 
+sub _get_homedir {
+    $^O eq 'MSWin32' && "$]" < 5.016 ? $ENV{HOME} || $ENV{USERPROFILE} : (glob('~'))[0];
+}
+
 # checks for the special directives
 #   #!include_default
 #   #!include /path/to/some/manifest.skip
@@ -466,6 +470,7 @@ sub _check_mskip_directives {
     while (<M>) {
         if (/^#!include\s+(.*)\s*$/) {
             my $external_file = $1;
+            $external_file =~ s/^~/_get_homedir()/e;
             if (my @external = _include_mskip_file($external_file)) {
                 push @lines, @external;
                 warn "Debug: Including external $external_file\n" if $Debug;
