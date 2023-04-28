@@ -18,7 +18,6 @@ our @EXPORT_OK = qw(mkmanifest
                 maniskip
                );
 
-our $Is_MacOS = $^O eq 'MacOS';
 our $Is_VMS   = $^O eq 'VMS';
 our $Is_VMS_mode = 0;
 our $Is_VMS_lc = 0;
@@ -139,7 +138,6 @@ sub mkmanifest {
             warn "Added to $MANIFEST: $file\n" unless exists $read->{$file};
         }
         my $text = $all{$file};
-        $file = _unmacify($file);
         my $tabs = (5 - (length($file)+1)/8);
         $tabs = 1 if $tabs < 1;
         $tabs = 0 unless $text;
@@ -156,7 +154,6 @@ sub mkmanifest {
 sub clean_up_filename {
   my $filename = shift;
   $filename =~ s|^\./||;
-  $filename =~ s/^:([^:]+)$/$1/ if $Is_MacOS;
   if ( $Is_VMS ) {
       $filename =~ s/\.$//;                           # trim trailing dot
       $filename = VMS::Filespec::unixify($filename);  # unescape spaces, etc.
@@ -193,8 +190,7 @@ sub manifind {
     # $File::Find::name is unavailable.
     # Also, it's okay to use / here, because MANIFEST files use Unix-style
     # paths.
-    find({wanted => $wanted, follow_fast => 1},
-        $Is_MacOS ? ":" : ".");
+    find({wanted => $wanted, follow_fast => 1}, ".");
 
     return $found;
 }
@@ -312,8 +308,7 @@ sub _check_manifest {
         next if $skip->($file);
         warn "Debug: manicheck checking from disk $file\n" if $Debug;
         unless ( exists $read->{$file} ) {
-            my $canon = $Is_MacOS ? "\t" . _unmacify($file) : '';
-            warn "Not in $MANIFEST: $file$canon\n" unless $Quiet;
+            warn "Not in $MANIFEST: $file\n" unless $Quiet;
             push @missentry, $file;
         }
     }
@@ -360,11 +355,7 @@ sub maniread {
         }
         next unless $file;
 
-        if ($Is_MacOS) {
-            $file = _macify($file);
-            $file =~ s/\\([0-3][0-7][0-7])/sprintf("%c", oct($1))/ge;
-        }
-        elsif ($Is_VMS_mode) {
+        if ($Is_VMS_mode) {
             require File::Basename;
             my($base,$dir) = File::Basename::fileparse($file);
             # Resolve illegal file specifications in the same way as tar
@@ -432,7 +423,7 @@ sub maniskip {
             next;
         }
         next unless my $filename = _process_skipline($_);
-        push @skip, _macify($filename);
+        push @skip, $filename;
     }
     return sub {0} unless (scalar @skip > 0);
 
@@ -545,22 +536,13 @@ sub manicopy {
     $target = VMS::Filespec::unixify($target) if $Is_VMS_mode;
     File::Path::mkpath([ $target ],! $Quiet,$Is_VMS ? undef : 0755);
     foreach my $file (keys %$read){
-        if ($Is_MacOS) {
-            if ($file =~ m!:!) {
-                my $dir = _maccat($target, $file);
-                $dir =~ s/[^:]+$//;
-                File::Path::mkpath($dir,1,0755);
-            }
-            cp_if_diff($file, _maccat($target, $file), $how);
-        } else {
-            $file = VMS::Filespec::unixify($file) if $Is_VMS_mode;
-            if ($file =~ m!/!) { # Ilya, that hurts, I fear, or maybe not?
-                my $dir = File::Basename::dirname($file);
-                $dir = VMS::Filespec::unixify($dir) if $Is_VMS_mode;
-                File::Path::mkpath(["$target/$dir"],! $Quiet,$Is_VMS ? undef : 0755);
-            }
-            cp_if_diff($file, "$target/$file", $how);
+        $file = VMS::Filespec::unixify($file) if $Is_VMS_mode;
+        if ($file =~ m!/!) { # Ilya, that hurts, I fear, or maybe not?
+            my $dir = File::Basename::dirname($file);
+            $dir = VMS::Filespec::unixify($dir) if $Is_VMS_mode;
+            File::Path::mkpath(["$target/$dir"],! $Quiet,$Is_VMS ? undef : 0755);
         }
+        cp_if_diff($file, "$target/$file", $how);
     }
 }
 
@@ -641,43 +623,6 @@ sub best {
         ln($srcFile, $dstFile) or cp($srcFile, $dstFile);
     }
 }
-
-sub _macify {
-    my($file) = @_;
-
-    return $file unless $Is_MacOS;
-
-    $file =~ s|^\./||;
-    if ($file =~ m|/|) {
-        $file =~ s|/+|:|g;
-        $file = ":$file";
-    }
-
-    $file;
-}
-
-sub _maccat {
-    my($f1, $f2) = @_;
-
-    return "$f1/$f2" unless $Is_MacOS;
-
-    $f1 .= ":$f2";
-    $f1 =~ s/([^:]:):/$1/g;
-    return $f1;
-}
-
-sub _unmacify {
-    my($file) = @_;
-
-    return $file unless $Is_MacOS;
-
-    $file =~ s|^:||;
-    $file =~ s|([/ \n])|sprintf("\\%03o", unpack("c", $1))|ge;
-    $file =~ y|:|/|;
-
-    $file;
-}
-
 
 =head2 maniadd
 
