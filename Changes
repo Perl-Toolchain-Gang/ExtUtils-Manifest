@@ -1,5 +1,7 @@
 Revision history for ExtUtils-Manifest
 
+{{$NEXT}}
+
 1.75  2023-04-29
   - #!include_default now memory-only, not changing MANIFEST.SKIP file.
   - support removed for MacOS Classic
