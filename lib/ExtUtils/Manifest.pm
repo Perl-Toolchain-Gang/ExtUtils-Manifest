@@ -118,7 +118,7 @@ sub mkmanifest {
     my $bakbase = $MANIFEST;
     $bakbase =~ s/\./_/g if $Is_VMS_nodot; # avoid double dots
     rename $MANIFEST, "$bakbase.bak" unless $manimiss;
-    open my $fh, "> $MANIFEST" or die "Could not open $MANIFEST: $!";
+    open my $fh, '>', $MANIFEST or die "Could not open $MANIFEST: $!";
     binmode $fh, ':raw';
     my $skip = maniskip();
     my $found = manifind();
@@ -334,7 +334,7 @@ sub maniread {
     $mfile ||= $MANIFEST;
     my $read = {};
     my $fh;
-    unless (open $fh, "< $mfile"){
+    unless (open $fh, '<', $mfile){
         warn "Problem opening $mfile: $!";
         return $read;
     }
@@ -413,7 +413,7 @@ sub maniskip {
     _check_mskip_directives($mfile) if -f $mfile;
     local $_;
     my $fh;
-    open $fh, "< $mfile" or open $fh, "< $DEFAULT_MSKIP" or return sub {0};
+    open $fh, '<', $mfile or open $fh, '<', $DEFAULT_MSKIP or return sub {0};
     while (<$fh>){
         if (/^#!include_default\s*$/) {
             if (my @default = _include_mskip_file()) {
@@ -452,7 +452,7 @@ sub _check_mskip_directives {
     my $fh;
     my @lines = ();
     my $flag = 0;
-    unless (open $fh, "< $mfile") {
+    unless (open $fh, '<', $mfile) {
         warn "Problem opening $mfile: $!";
         return;
     }
@@ -475,7 +475,7 @@ sub _check_mskip_directives {
     $bakbase =~ s/\./_/g if $Is_VMS_nodot;  # avoid double dots
     rename $mfile, "$bakbase.bak";
     warn "Debug: Saving original $mfile as $bakbase.bak\n" if $Debug;
-    unless (open $fh, "> $mfile") {
+    unless (open $fh, '>', $mfile) {
         warn "Problem opening $mfile: $!";
         return;
     }
@@ -494,7 +494,7 @@ sub _include_mskip_file {
     }
     local $_;
     my $fh;
-    unless (open $fh, "< $mskip") {
+    unless (open $fh, '<', $mskip) {
         warn "Problem opening $mskip: $!";
         return;
     }
@@ -554,8 +554,8 @@ sub cp_if_diff {
     }
     my($diff) = 0;
     my ($fromfh, $tofh);
-    open($fromfh, "< $from\0") or die "Can't read $from: $!\n";
-    if (open($tofh, "< $to\0")) {
+    open($fromfh, '<', $from) or die "Can't read $from: $!\n";
+    if (open($tofh, '<', $to)) {
         local $_;
         while (<$fromfh>) { $diff++,last if $_ ne <$tofh>; }
         $diff++ unless eof($tofh);
@@ -644,7 +644,7 @@ sub maniadd {
     my @needed = grep !exists $manifest->{$_}, keys %$additions;
     return 1 unless @needed;
 
-    open(my $fh, ">>$MANIFEST") or
+    open(my $fh, '>>', $MANIFEST) or
       die "maniadd() could not open $MANIFEST: $!";
     binmode $fh, ':raw';
 
@@ -667,7 +667,7 @@ sub maniadd {
 sub _fix_manifest {
     my $manifest_file = shift;
 
-    open my $fh, $MANIFEST or die "Could not open $MANIFEST: $!";
+    open my $fh, '<', $MANIFEST or die "Could not open $MANIFEST: $!";
     local $/;
     my @manifest = split /(\015\012|\012|\015)/, <$fh>, -1;
     close $fh;
