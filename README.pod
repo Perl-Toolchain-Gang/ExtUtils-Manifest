@@ -6,7 +6,7 @@ ExtUtils::Manifest - Utilities to write and check a MANIFEST file
 
 =head1 VERSION
 
-version 1.74
+version 1.75
 
 =head1 SYNOPSIS
 
@@ -200,11 +200,17 @@ files. At present two such directives are recognized.
 
 =item #!include_default
 
-This inserts the contents of the default MANIFEST.SKIP file
+This tells ExtUtils::Manifest to read the default F<MANIFEST.SKIP>
+file and skip files accordingly, but I<not> to include it in the local
+F<MANIFEST.SKIP>. This is intended to skip files according to a system
+default, which can change over time without requiring further changes
+to the distribution's F<MANIFEST.SKIP>.
 
 =item #!include /Path/to/another/manifest.skip
 
-This inserts the contents of the specified external file
+This inserts the contents of the specified external file in the local
+F<MANIFEST.SKIP>. This is intended for authors to have a central
+F<MANIFEST.SKIP> file, and to include it with their various distributions.
 
 =back
 
