@@ -669,8 +669,8 @@ sub _fix_manifest {
 
     open my $fh, '<', $MANIFEST or die "Could not open $MANIFEST: $!";
     local $/;
-    my @manifest = split /(\015\012|\012|\015)/, <$fh>, -1;
-    close $fh;
+    my @manifest = split /(\r\n|\n|\r)/, <$fh>, -1;
+    close $fh or die "could not read $MANIFEST: $!";
     my $must_rewrite = "";
     if ($manifest[-1] eq ""){
         # sane case: last line had a terminal newline
