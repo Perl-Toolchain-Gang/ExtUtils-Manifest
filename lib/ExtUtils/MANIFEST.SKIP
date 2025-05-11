@@ -65,6 +65,10 @@
 # Avoid prove files
 \B\.prove$
 
+# Avoid yath files
+^\.yath-ipc/
+^\.test_info\..+\.json$
+
 # Avoid MYMETA files
 ^MYMETA\.
 
