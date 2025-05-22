@@ -38,6 +38,11 @@
 # and Module::Build::Tiny generated files
 \b_build_params$
 
+^local/   # Carton local library
+
+^\.build/ # Dist::Zilla build directory
+^\.mite/  # Mite build directory
+
 # Avoid temp and backup files.
 ~$
 \.old$
@@ -76,3 +81,6 @@
 
 # Avoid AppVeyor file
 ^\.?appveyor.yml
+
+# Perl::Tidy error files
+\bperltidy\.ERR
