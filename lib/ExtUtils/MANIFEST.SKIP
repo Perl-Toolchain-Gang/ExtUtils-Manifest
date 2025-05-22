@@ -6,7 +6,7 @@
 \B\.svn\b
 \B\.git\b
 ^\.github\b
-\B\.gitignore\b
+\B\.git(?:ignore|keep)\b
 \b_darcs\b
 \B\.cvsignore$
 \B\.bzr\b
