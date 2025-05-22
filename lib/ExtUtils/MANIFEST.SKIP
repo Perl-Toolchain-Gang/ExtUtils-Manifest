@@ -11,6 +11,7 @@
 \B\.cvsignore$
 \B\.bzr\b
 \B\.bzrignore$
+^\.mailmap
 
 # Avoid VMS specific MakeMaker generated files
 \bDescrip.MMS$
