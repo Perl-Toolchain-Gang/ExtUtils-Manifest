@@ -6,11 +6,12 @@
 \B\.svn\b
 \B\.git\b
 ^\.github\b
-\B\.gitignore\b
+\B\.git(?:ignore|keep)\b
 \b_darcs\b
 \B\.cvsignore$
 \B\.bzr\b
 \B\.bzrignore$
+^\.mailmap
 
 # Avoid VMS specific MakeMaker generated files
 \bDescrip.MMS$
@@ -37,6 +38,11 @@
 
 # and Module::Build::Tiny generated files
 \b_build_params$
+
+^local/   # Carton local library
+
+^\.build/ # Dist::Zilla build directory
+^\.mite/  # Mite build directory
 
 # Avoid temp and backup files.
 ~$
@@ -76,3 +82,6 @@
 
 # Avoid AppVeyor file
 ^\.?appveyor.yml
+
+# Perl::Tidy error files
+\bperltidy\.ERR
